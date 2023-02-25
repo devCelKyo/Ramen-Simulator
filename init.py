@@ -15,5 +15,3 @@ async def init():
     await Tortoise.generate_schemas()
 
 run(init())
-
-print("coucou")

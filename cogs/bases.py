@@ -19,7 +19,7 @@ class Bases(commands.Cog):
         await ctx.send("Pong")
     
     @commands.command()
-    async def help(self, ctx):
+    async def help_game(self, ctx):
         await ctx.send("Run the !start command to start playing!")
 
     @commands.command()

@@ -1,5 +1,6 @@
-import discord
 import discord.ext.commands as commands
+
+from models.user import User
 
 class Bases(commands.Cog):
     def __init__(self, bot):
@@ -16,3 +17,16 @@ class Bases(commands.Cog):
     @commands.command()
     async def ping(self, ctx):
         await ctx.send("Pong")
+    
+    @commands.command()
+    async def help(self, ctx):
+        await ctx.send("Run the !start command to start playing!")
+
+    @commands.command()
+    async def start(self, ctx):
+        # Check if discord User already has a User registered
+        if User.exists(discord_id=ctx.author.id):
+            await ctx.send("You are already registered.")
+        else:
+            await User.create(discord_id=ctx.author.id, money=50)
+            await ctx.send("Registration complete!")

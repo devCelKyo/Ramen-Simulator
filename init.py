@@ -1,4 +1,4 @@
-from tortoise import Tortoise
+from tortoise import Tortoise, run_async
 from utils.db_connect import connect
 
 async def init():
@@ -7,4 +7,4 @@ async def init():
     await Tortoise.generate_schemas()
     await Tortoise.close_connections()
 
-Tortoise.run_async(init())
+run_async(init())

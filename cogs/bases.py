@@ -25,7 +25,8 @@ class Bases(commands.Cog):
     @commands.command()
     async def start(self, ctx):
         # Check if discord User already has a User registered
-        if User.exists(discord_id=ctx.author.id):
+        user_exists = await User.exists(discord_id=ctx.author.id)
+        if user_exists:
             await ctx.send("You are already registered.")
         else:
             await User.create(discord_id=ctx.author.id, money=50)

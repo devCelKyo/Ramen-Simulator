@@ -12,5 +12,5 @@ async def add_cogs():
     await Bot.add_cog(Bases(Bot))
     # add all others cogs
 
-run(add_cogs)
+run(add_cogs())
 Bot.run(os.environ['hashirama_bot_token'])

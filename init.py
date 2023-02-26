@@ -9,7 +9,7 @@ async def init():
     db_url = "mysql://{}/game_db".format(os.environ['db_credentials'])
     await Tortoise.init(
         db_url=db_url,
-        modules={'models': ['model']}
+        modules={'models': ['models.model']}
     )
     # Generate the schema
     await Tortoise.generate_schemas()

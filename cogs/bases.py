@@ -1,7 +1,5 @@
 import discord.ext.commands as commands
 
-from models.user import User
-
 class Bases(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -25,9 +23,5 @@ class Bases(commands.Cog):
     @commands.command()
     async def start(self, ctx):
         # Check if discord User already has a User registered
-        user_exists = await User.exists(discord_id=ctx.author.id)
-        if user_exists:
-            await ctx.send("You are already registered.")
-        else:
-            await User.create(discord_id=ctx.author.id, money=50)
-            await ctx.send("Registration complete!")
+        pass
+        # If not, create new User with API

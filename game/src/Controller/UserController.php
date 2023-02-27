@@ -56,4 +56,49 @@ class UserController extends AbstractController
 
         return $json;
     }
+
+    #[Route('/claim_daily', name : 'claim_daily')]
+    public function claim_daily(ManagerRegistry $doctrine, Request $request): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $repository = $doctrine->getRepository(User::class);
+
+        // Retrieve user based on request parameters
+        $discord_id = $request->request->get('discord_id');
+        $user = $repository->findOneBy(['discord_id' => $discord_id]);
+
+        // Check time difference to see if claim is available
+        $CLAIM_DELAY = 12; // hours
+        $CLAIM_MONEY = 50; // in-game currency
+
+        $last_claim = $user->getLastDailyClaim();
+        if ($last_claim == null) {
+            $last_claim = new \DateTime("01/01/1970");
+        }
+
+        $now = new \DateTime("now");
+        $diff = $last_claim->diff($now);
+    
+        if ($diff->format('%h') >= $CLAIM_DELAY) {
+            $user->addMoney($CLAIM_MONEY);
+            $user->setLastDailyClaim($now);
+            $em->persist($user);
+
+            $json = $this->json([
+                'money_given' => $CLAIM_MONEY,
+                'error' => 'False'
+            ]);
+        }
+        else {
+            $next_claim = $last_claim->add(\DateInterval::createFromDateString($CLAIM_DELAY . " hours"));
+            $time_remaining = $now->diff($next_claim);
+            $json = $this->json([
+                'time_remaining' => $time_remaining->format("%h hours %i minutes %s seconds"),
+                'error' => 'True'
+            ]);
+        }
+        $em->flush();
+
+        return $json;
+    }
 }

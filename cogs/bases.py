@@ -1,7 +1,7 @@
 import discord
 import discord.ext.commands as commands
 
-from utils.users import user_exists, create_user
+from utils.users import get_user, user_exists, create_user, claim_daily_user
 from utils.embed import send_embed
 
 class Bases(commands.Cog):
@@ -22,15 +22,53 @@ class Bases(commands.Cog):
     
     @commands.command()
     async def help_game(self, ctx):
-        await ctx.send("Run the !start command to start playing!")
+        await ctx.reply("Run the !start command to start playing!")
 
     @commands.command()
     async def start(self, ctx):
         discord_id = ctx.author.id
         # Check if discord User already has a User registered
         if user_exists(discord_id):
-            await ctx.send("You are already registered")
+            await ctx.reply("You are already registered")
         # If not, create new User with API
         else:
             create_user(discord_id)
-            await ctx.send("Registration complete!")
+            await ctx.reply("Registration complete!")
+    
+    @commands.command()
+    async def home(self, ctx):
+        discord_id = ctx.author.id
+        user_response = get_user(discord_id)
+
+        if user_response["error"] == "True":
+            await send_embed("Error : Not registered",
+                             "You are not registered! Please run the !start command to start playing.",
+                             ctx,
+                             discord.Colour.brand_red)
+        else:
+            money = user_response["user"]["money"]
+            embed = discord.Embed(
+                title="Profile",
+                colour=discord.Colour.dark_blue()
+            )
+
+            embed.add_field(name="Mention", value=ctx.author.mention)
+            embed.add_field(name="Money", value=f"{money} 両")
+
+            await ctx.reply(embed=embed)
+
+    @commands.command()
+    async def claim_daily(self, ctx):
+        discord_id = ctx.author.id
+        response = claim_daily_user(discord_id)
+
+        if response["error"] == "True":
+            title = "Bi-daily claim : Failed!"
+            description = f"Claim is not ready yet. Time remaining : {response['time_remaining']}"
+            colour = discord.Colour.brand_red()
+        else:
+            title = "Bi-daily claim : Success!"
+            description = f"You claimed your daily reward ! +{response['money_given']}両"
+            colour = discord.Colour.brand_green()
+        
+        await send_embed(title, description, ctx, colour)

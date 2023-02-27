@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -18,6 +19,9 @@ class User
 
     #[ORM\Column]
     private ?int $money = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $last_daily_claim = null;
 
     public function jsonSerialize() {
         return [
@@ -51,6 +55,25 @@ class User
     public function setMoney(int $money): self
     {
         $this->money = $money;
+
+        return $this;
+    }
+
+    public function addMoney(int $money): self
+    {
+        $this->money = $this->money + $money;
+
+        return $this;
+    }
+
+    public function getLastDailyClaim(): ?\DateTimeInterface
+    {
+        return $this->last_daily_claim;
+    }
+
+    public function setLastDailyClaim(?\DateTimeInterface $last_daily_claim): self
+    {
+        $this->last_daily_claim = $last_daily_claim;
 
         return $this;
     }

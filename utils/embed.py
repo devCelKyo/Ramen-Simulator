@@ -7,4 +7,4 @@ async def send_embed(title, description, ctx, colour=discord.Colour.dark_gold())
         colour=colour
     )
 
-    await ctx.send(embed=embed)
+    await ctx.reply(embed=embed)

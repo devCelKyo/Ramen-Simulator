@@ -19,6 +19,13 @@ class User
     #[ORM\Column]
     private ?int $money = null;
 
+    public function jsonSerialize() {
+        return [
+            'discord_id' => $this->getDiscordId(),
+            'money' => $this->getMoney()
+        ];
+    }
+
     public function getId(): ?int
     {
         return $this->id;

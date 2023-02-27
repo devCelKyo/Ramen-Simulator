@@ -1,1 +1,2 @@
-tortoise==0.1.1
+discord.py==2.1.1
+docutils==0.19

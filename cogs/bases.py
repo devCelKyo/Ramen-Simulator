@@ -1,5 +1,6 @@
 import discord.ext.commands as commands
-import requests
+
+from utils.users import user_exists, create_user
 
 class Bases(commands.Cog):
     def __init__(self, bot):
@@ -25,11 +26,9 @@ class Bases(commands.Cog):
     async def start(self, ctx):
         discord_id = ctx.author.id
         # Check if discord User already has a User registered
-        response = requests.get(f"http://localhost:8000/get_user/{discord_id}").json()
-        if response.error == "True":
+        if user_exists(discord_id):
             await ctx.send("You are already registered")
         # If not, create new User with API
         else:
-            params = {"discord_id" : discord_id}
-            requests.post("http://localhost:8000/create_user", params=params)
+            create_user(discord_id)
             await ctx.send("Registration complete!")

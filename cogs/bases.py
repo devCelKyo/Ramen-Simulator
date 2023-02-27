@@ -2,6 +2,7 @@ import discord
 import discord.ext.commands as commands
 
 from utils.users import user_exists, create_user
+from utils.embed import send_embed
 
 class Bases(commands.Cog):
     def __init__(self, bot):
@@ -17,13 +18,7 @@ class Bases(commands.Cog):
     
     @commands.command()
     async def ping(self, ctx):
-        embed = discord.Embed(
-            colour=discord.Colour.dark_gold(),
-            description="Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere",
-            title="Pong"
-        )
-
-        await ctx.send(embed=embed)
+        await send_embed("Pong", "Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere", ctx)
     
     @commands.command()
     async def help_game(self, ctx):

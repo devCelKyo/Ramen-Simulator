@@ -18,7 +18,7 @@ class Bases(commands.Cog):
     @commands.command()
     async def ping(self, ctx):
         embed = discord.Embed(
-            colour=discord.Colour.dark_gold,
+            colour=discord.Colour.dark_gold(),
             description="Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere",
             title="Pong"
         )

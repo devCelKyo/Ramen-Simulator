@@ -1,3 +1,4 @@
+import discord
 import discord.ext.commands as commands
 
 from utils.users import user_exists, create_user
@@ -16,7 +17,13 @@ class Bases(commands.Cog):
     
     @commands.command()
     async def ping(self, ctx):
-        await ctx.send("Pong")
+        embed = discord.Embed(
+            colour=discord.Colour.dark_gold,
+            description="Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere",
+            title="Pong"
+        )
+
+        await ctx.send(embed=embed)
     
     @commands.command()
     async def help_game(self, ctx):

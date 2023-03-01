@@ -72,14 +72,17 @@ class UserController extends AbstractController
         $CLAIM_MONEY = 50; // in-game currency
 
         $last_claim = $user->getLastDailyClaim();
+        $now = new \DateTime("now");
+
         if ($last_claim == null) {
-            $last_claim = new \DateTime("01/01/1970");
+            $last_claim = new \DateTime("01-01-1970");    
         }
 
-        $now = new \DateTime("now");
         $diff = $last_claim->diff($now);
+        // Let's convert diff to plain seconds, then hours by multiplying by 3600
+        $diff = date_create('@0')->add($diff)->getTimestamp() / 3600;
     
-        if ($diff->format('%h') >= $CLAIM_DELAY) {
+        if ($diff >= $CLAIM_DELAY) {
             $user->addMoney($CLAIM_MONEY);
             $user->setLastDailyClaim($now);
             $em->persist($user);

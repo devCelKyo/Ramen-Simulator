@@ -7,7 +7,7 @@ from cogs.bases import Bases
 intents = discord.Intents.default()
 intents.message_content = True
 
-Bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
+Bot = discord.ext.commands.Bot(command_prefix='r', intents=intents)
 async def add_cogs():
     await Bot.add_cog(Bases(Bot))
     # add all others cogs

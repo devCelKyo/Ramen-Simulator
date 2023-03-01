@@ -3,12 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements \JsonSerializable
 {
+    const REBIRTH_PRICES = array(30000, 300000, 3000000, 30000000);
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -23,7 +27,19 @@ class User
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $last_daily_claim = null;
 
-    public function jsonSerialize() {
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Restaurant::class, orphanRemoval: true)]
+    private Collection $restaurants;
+
+    #[ORM\Column]
+    private ?int $rebirth = null;
+
+    public function __construct()
+    {
+        $this->restaurants = new ArrayCollection();
+    }
+
+    public function jsonSerialize(): mixed 
+    {
         return [
             'discord_id' => $this->getDiscordId(),
             'money' => $this->getMoney()
@@ -59,9 +75,16 @@ class User
         return $this;
     }
 
-    public function addMoney(int $money): self
+    public function addMoney(int $money): self // NEVER EVER USE addMoney WITH NEGATIVE VALUES TO WITHDRAW MONEY, IT USES THE REBIRTH MULTIPLIER !!!!!
     {
-        $this->money = $this->money + $money;
+        $this->money = $this->money + $this->getRebirthMultiplier()*$money;
+
+        return $this;
+    }
+
+    public function withdrawMoney(int $money): self // USE THIS INSTEAD TO WITHDRAW MONEY, READ THE NAME
+    {
+        $this->money = $this->money - $money;
 
         return $this;
     }
@@ -76,5 +99,57 @@ class User
         $this->last_daily_claim = $last_daily_claim;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Restaurant>
+     */
+    public function getRestaurants(): Collection
+    {
+        return $this->restaurants;
+    }
+
+    public function addRestaurant(Restaurant $restaurant): self
+    {
+        if (!$this->restaurants->contains($restaurant)) {
+            $this->restaurants->add($restaurant);
+            $restaurant->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRestaurant(Restaurant $restaurant): self
+    {
+        if ($this->restaurants->removeElement($restaurant)) {
+            // set the owning side to null (unless already changed)
+            if ($restaurant->getOwner() === $this) {
+                $restaurant->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRebirth(): ?int
+    {
+        return $this->rebirth;
+    }
+
+    public function setRebirth(int $rebirth): self
+    {
+        $this->rebirth = $rebirth;
+
+        return $this;
+    }
+
+    public function getRebirthMultiplier(): int
+    {
+        if ($this->rebirth == null || $this->rebirth == 0) {
+            return 1;
+        }
+        else {
+            return pow(2, $this->rebirth);
+        }
     }
 }

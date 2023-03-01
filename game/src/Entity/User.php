@@ -76,11 +76,12 @@ class User implements \JsonSerializable
         return $this;
     }
 
-    public function addMoney(int $money): self // NEVER EVER USE addMoney WITH NEGATIVE VALUES TO WITHDRAW MONEY, IT USES THE REBIRTH MULTIPLIER !!!!!
+    public function addMoney(int $money): int // NEVER EVER USE addMoney WITH NEGATIVE VALUES TO WITHDRAW MONEY, IT USES THE REBIRTH MULTIPLIER !!!!!
     {
-        $this->money = $this->money + $this->getRebirthMultiplier()*$money;
+        $given_money = $this->getRebirthMultiplier()*$money;
+        $this->money = $this->money + $given_money;
 
-        return $this;
+        return $given_money;
     }
 
     public function withdrawMoney(int $money): self // USE THIS INSTEAD TO WITHDRAW MONEY, READ THE NAME

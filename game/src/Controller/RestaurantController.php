@@ -7,6 +7,7 @@ use App\Entity\Restaurant;
 use Doctrine\Persistence\ManagerRegistry;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -95,5 +96,97 @@ class RestaurantController extends AbstractController
     {
         $em = $doctrine->getManager();
         $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($restaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No restaurant has this ID.'
+            ]);
+        }
+
+        $restaurant->update();
+        $em->persist($restaurant);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False'
+        ]);
+    }
+
+    #[Route('/update_restaurants/{discord_id}', name: 'update_restaurants')]
+    public function update_restaurants(ManagerRegistry $doctrine, string $discord_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $owner = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
+        if ($owner == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'This user is not registered or does not exist.'
+            ]);
+        }
+
+        $restaurants = $owner->getRestaurants();
+        foreach ($restaurants as $restaurant) {
+            $restaurant->update();
+            $em->persist($restaurant);
+        }
+
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False'
+        ]);
+    }
+
+    #[Route('/claim_restaurant/{restaurant_public_id}', name: 'claim_restaurant')]
+    public function claim_restaurant(ManagerRegistry $doctrine, string $restaurant_public_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($restaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No restaurant has this ID.'
+            ]);
+        }
+
+        $owner = $restaurant->getOwner();
+        $given_money = $restaurant->claim();
+        $em->persist($owner);
+        $em->persist($restaurant);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'given_money' => $given_money
+        ]);
+    }
+
+    #[Route('/claim_restaurants/{discord_id}', name: 'claim_restaurants')]
+    public function claim_restaurants(ManagerRegistry $doctrine, string $discord_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $owner = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
+        if ($owner == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'This user is not registered or does not exist.'
+            ]);
+        }
+
+        $restaurants = $owner->getRestaurants();
+        
+        $given_money = 0;
+        foreach ($restaurants as $restaurant) {
+            $given_money += $restaurant->claim();
+            $em->persist($restaurant);
+        }
+
+        $em->persist($owner);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'given_money' => $given_money
+        ]);
     }
 }

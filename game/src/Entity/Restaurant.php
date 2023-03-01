@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\RestaurantRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Util\Debug;
 
 #[ORM\Entity(repositoryClass: RestaurantRepository::class)]
 class Restaurant implements \JsonSerializable
@@ -12,8 +13,10 @@ class Restaurant implements \JsonSerializable
     const UPGRADE_PRICES = array(1000, 5000, 10000, 20000, 40000, 80000, 160000, 320000, 640000);
     const PRICE = 30000;
     const STORAGES = array(100, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000);
+    const RAMEN_COST = 0.2;
     const RAMEN_VALUES = array(2, 4, 8, 10, 13, 16, 19, 22, 25, 30);
     const WORKERS_SPEED = 3; // Minutes per ramen per worker
+    const WORKERS_WAGES = array(0.5, 0.5, 1, 1, 2, 2, 3, 3, 3, 4); // Money per minute
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -22,7 +25,7 @@ class Restaurant implements \JsonSerializable
 
     #[ORM\ManyToOne(inversedBy: 'restaurants', cascade: ["persist"])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $owner = null;
+    private ?User $owner = null;
 
     #[ORM\Column]
     private ?int $capacity = null;
@@ -64,7 +67,8 @@ class Restaurant implements \JsonSerializable
             'quality' => $this->quality,
             'ramen_stored' => $this->ramen_stored,
             'max_storage' => $this->getStorage(),
-            'workers' => $this->workers
+            'workers' => $this->workers,
+            'money_cached' => $this->getMoneyCached()
         ];
     }
 
@@ -133,6 +137,11 @@ class Restaurant implements \JsonSerializable
         return self::RAMEN_VALUES[$this->quality - 1];
     }
 
+    public function getRamenCost(): int
+    {
+        return self::RAMEN_COST;
+    }
+
     public function getUpgradeQualityPrice(): int
     {
         return self::UPGRADE_PRICES[$this->getQuality() - 1];
@@ -150,17 +159,25 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function addRamenStored(int $ramen): self
+    {
+        $this->owner->withdrawMoney($this->getRamenCost() * $ramen);
+        $this->ramen_stored = $this->ramen_stored + $ramen;
+
+        return $this;
+    }
+
     public function sellRamen(int $amount): self
     {
         $this->ramen_stored = $this->ramen_stored - $amount;
-        $this->money_cached = $this->money_cached + $this->getRamenValue() * $amount;
+        $this->addMoneyCached($this->getRamenValue() * $amount);
 
         return $this;
     }
 
     public function getStorage(): int
     {
-        return self::STORAGES[$this->capacity - 1];
+        return self::STORAGES[$this->getCapacity() - 1];
     }
 
     public function getWorkers(): ?int
@@ -175,11 +192,31 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function addWorkers(int $workers): self
+    {
+        $this->workers = $this->workers + $workers;
+
+        return $this;
+    }
+
     public function getWorkersSpeed(): int
     {
         return self::WORKERS_SPEED;
     }
+
+    public function getWages(): int
+    {
+        return self::WORKERS_WAGES[$this->getQuality() - 1];
+    }
     
+    public function payWages(int $steps): self
+    {
+        $wages = $this->getWages() * $steps * $this->getWorkersSpeed();
+        $this->withdrawMoneyCached($wages);
+
+        return $this;
+    }
+
     public function getPublicId(): ?string
     {
         return $this->public_id;
@@ -204,14 +241,28 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function addMoneyCached(int $money): self
+    {
+        $this->money_cached = $this->money_cached + $money;
+
+        return $this;
+    }
+
+    public function withdrawMoneyCached(int $money): self
+    {
+        $this->money_cached = max($this->money_cached - $money, 0);
+
+        return $this;
+    }
+
     public function getLastUpdate(): ?\DateTimeInterface
     {
-        return $this->last_update;
+        return clone $this->last_update;
     }
 
     public function setLastUpdate(?\DateTimeInterface $last_update): self
     {
-        $this->last_update = $last_update;
+        $this->last_update = clone $last_update;
 
         return $this;
     }
@@ -228,14 +279,26 @@ class Restaurant implements \JsonSerializable
         $steps = intdiv($difference_seconds, $delay);
         
         // We use an integer division, so the new update date isn't necessarily now() but the biggest multiple of $delay before now()
-        $time_to_add = \DateInterval::createFromString($steps * 3 .' minutes');
-        $new_update = $last_update->add($time_to_add);
-        $this->setLastUpdate($new_update);
+        $datetime = $steps * $this->getWorkersSpeed();
+        $time_to_add = \DateInterval::createFromDateString($datetime." minutes");
+        $last_update->add($time_to_add);
+        $this->setLastUpdate($last_update);
 
-        // Finally, let's compute how much ramen has been made and update accordingly
+        // Finally, let's compute how much ramen has been made, pay wages and update accordingly
         $ramen_made = min($this->getRamenStored(), $this->getWorkers() * $steps);
         $this->sellRamen($ramen_made);
+        $this->payWages($steps);
 
         return $this;
+    }
+
+    public function claim(): int // I am pretty sure you need to persist the owner in the database after calling claim... But who knows? Certainly not me!
+    {
+        $this->update();
+        $owner = $this->getOwner();
+        $given_money = $owner->addMoney($this->getMoneyCached());
+        $this->setMoneyCached(0);
+
+        return $given_money;
     }
 }

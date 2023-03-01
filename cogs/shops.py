@@ -1,6 +1,8 @@
 import discord
 import discord.ext.commands as commands
 
+import assets.restaurants
+
 from utils.embed import send_embed
 from utils.restaurants import get_restaurants, buy_restaurant
 
@@ -26,11 +28,15 @@ class Shops(commands.Cog):
             colour = discord.Colour.dark_blue()
         
         embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_thumbnail(url=assets.restaurants.RAMEN)
         
         restaurants = response["restaurants"]
         for restaurant in restaurants:
-            embed.add_field(name="restaurant", value=f"Capacity : {restaurant['capacity']}")
+            text = f"Capacity : level {restaurant['capacity']}/10\nQuality : level {restaurant['quality']}/10"
+            text += f"\nRamen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}"
+            embed.add_field(name=f"#```{restaurant['public_id']}```", value=text)
         
+        embed.set_footer(text="Type rss [id] to get more details and access specific actions")
         await ctx.reply(embed=embed)
     
     @commands.command(aliases=["bs"])

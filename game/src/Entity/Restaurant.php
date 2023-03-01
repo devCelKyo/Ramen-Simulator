@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RestaurantRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RestaurantRepository::class)]
@@ -10,6 +11,9 @@ class Restaurant implements \JsonSerializable
 {
     const UPGRADE_PRICES = array(1000, 5000, 10000, 20000, 40000, 80000, 160000, 320000, 640000);
     const PRICE = 30000;
+    const STORAGES = array(100, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000);
+    const RAMEN_VALUES = array(2, 4, 8, 10, 13, 16, 19, 22, 25, 30);
+    const WORKERS_SPEED = 3; // Minutes per ramen per worker
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -35,6 +39,12 @@ class Restaurant implements \JsonSerializable
     #[ORM\Column(length: 10)]
     private ?string $public_id = null;
 
+    #[ORM\Column]
+    private ?int $money_cached = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $last_update = null;
+
     public function __construct()
     {
         $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -49,9 +59,11 @@ class Restaurant implements \JsonSerializable
     {
         return [
             'owner' => $this->owner->getDiscordId(),
+            'public_id' => $this->public_id,
             'capacity' => $this->capacity,
             'quality' => $this->quality,
             'ramen_stored' => $this->ramen_stored,
+            'max_storage' => $this->getStorage(),
             'workers' => $this->workers
         ];
     }
@@ -116,6 +128,11 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function getRamenValue(): int
+    {
+        return self::RAMEN_VALUES[$this->quality - 1];
+    }
+
     public function getUpgradeQualityPrice(): int
     {
         return self::UPGRADE_PRICES[$this->getQuality() - 1];
@@ -133,6 +150,19 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function sellRamen(int $amount): self
+    {
+        $this->ramen_stored = $this->ramen_stored - $amount;
+        $this->money_cached = $this->money_cached + $this->getRamenValue() * $amount;
+
+        return $this;
+    }
+
+    public function getStorage(): int
+    {
+        return self::STORAGES[$this->capacity - 1];
+    }
+
     public function getWorkers(): ?int
     {
         return $this->workers;
@@ -145,6 +175,11 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function getWorkersSpeed(): int
+    {
+        return self::WORKERS_SPEED;
+    }
+    
     public function getPublicId(): ?string
     {
         return $this->public_id;
@@ -153,6 +188,53 @@ class Restaurant implements \JsonSerializable
     public function setPublicId(string $public_id): self
     {
         $this->public_id = $public_id;
+
+        return $this;
+    }
+
+    public function getMoneyCached(): ?int
+    {
+        return $this->money_cached;
+    }
+
+    public function setMoneyCached(int $money_cached): self
+    {
+        $this->money_cached = $money_cached;
+
+        return $this;
+    }
+
+    public function getLastUpdate(): ?\DateTimeInterface
+    {
+        return $this->last_update;
+    }
+
+    public function setLastUpdate(?\DateTimeInterface $last_update): self
+    {
+        $this->last_update = $last_update;
+
+        return $this;
+    }
+
+    public function update(): self
+    {
+        $now = new \DateTime();
+        $last_update = $this->getLastUpdate();
+        $difference = $last_update->diff($now); // This is a DateInterval, not a DateTime
+
+        $delay = $this->getWorkersSpeed() * 60;
+        // Let's find how many amount of $delay we can fit in $difference (integer division)
+        $difference_seconds = date_create('@0')->add($difference)->getTimestamp();
+        $steps = intdiv($difference_seconds, $delay);
+        
+        // We use an integer division, so the new update date isn't necessarily now() but the biggest multiple of $delay before now()
+        $time_to_add = \DateInterval::createFromString($steps * 3 .' minutes');
+        $new_update = $last_update->add($time_to_add);
+        $this->setLastUpdate($new_update);
+
+        // Finally, let's compute how much ramen has been made and update accordingly
+        $ramen_made = min($this->getRamenStored(), $this->getWorkers() * $steps);
+        $this->sellRamen($ramen_made);
 
         return $this;
     }

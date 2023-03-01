@@ -1,0 +1,1 @@
+RAMEN = "https://cdn.discordapp.com/attachments/778283670720479236/1080541950874239016/image.png"

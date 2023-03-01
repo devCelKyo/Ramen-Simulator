@@ -89,4 +89,11 @@ class RestaurantController extends AbstractController
             'restaurant_shard' => $restaurant->getPublicId()
         ]);
     }
+
+    #[Route('/update_restaurant/{restaurant_public_id}', name: 'update_restaurant')]
+    public function update_restaurant(ManagerRegistry $doctrine, string $restaurant_public_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+    }
 }

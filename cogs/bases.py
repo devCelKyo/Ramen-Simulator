@@ -19,14 +19,23 @@ class Bases(commands.Cog):
     
     @commands.command()
     async def ping(self, ctx):
+        '''
+        Pong ?
+        '''
         await send_embed("Pong", "Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere", ctx)
     
     @commands.command()
     async def help_game(self, ctx):
+        '''
+        To get help on how to get started
+        '''
         await ctx.reply("Run the rstart command to start playing!")
 
     @commands.command()
     async def start(self, ctx):
+        '''
+        To get started!
+        '''
         discord_id = ctx.author.id
         # Check if discord User already has a User registered
         if user_exists(discord_id):
@@ -38,6 +47,9 @@ class Bases(commands.Cog):
     
     @commands.command()
     async def home(self, ctx):
+        '''
+        To see the dashboard
+        '''
         discord_id = ctx.author.id
         user_response = get_user(discord_id)
 
@@ -55,11 +67,15 @@ class Bases(commands.Cog):
 
             embed.add_field(name="Mention", value=ctx.author.mention)
             embed.add_field(name="Money", value=f"{money} 両")
+            embed.add_field(name="Rebirths", value=f"{user_response['user']['rebirths']}")
 
             await ctx.reply(embed=embed)
 
     @commands.command(aliases=["dc"])
     async def daily_claim(self, ctx):
+        '''
+        You can claim a reward every 12 hours, don't forget it!
+        '''
         discord_id = ctx.author.id
         response = claim_daily_user(discord_id)
 
@@ -70,44 +86,6 @@ class Bases(commands.Cog):
         else:
             title = "Bi-daily claim : Success!"
             description = f"You claimed your daily reward ! +{response['money_given']}両"
-            colour = discord.Colour.brand_green()
-        
-        await send_embed(title, description, ctx, colour)
-    
-    @commands.command(aliases=["s"])
-    async def shops(self, ctx):
-        discord_id = ctx.author.id
-        response = get_restaurants(discord_id)
-
-        if response["error"] == "True":
-            title = "Error !"
-            description = response["message"]
-            colour = discord.Colour.brand_red()
-        else:
-            title = "Restaurants"
-            description = f"Here are {ctx.author.mention}'s restaurants"
-            colour = discord.Colour.dark_blue()
-        
-        embed = discord.Embed(title=title, description=description, colour=colour)
-        
-        restaurants = response["restaurants"]
-        for restaurant in restaurants:
-            embed.add_field(name="restaurant", value=f"Capacity : {restaurant['capacity']}")
-        
-        await ctx.reply(embed=embed)
-    
-    @commands.command(aliases=["bs"])
-    async def buy_shop(self, ctx):
-        discord_id = ctx.author.id
-        response = buy_restaurant(discord_id)
-
-        if response["error"] == "True":
-            title = "Error !"
-            description = response["message"]
-            colour = discord.Colour.brand_red()
-        else:
-            title = "Restaurant Purchase"
-            description = f"You succesfully purchased a restaurant!"
             colour = discord.Colour.brand_green()
         
         await send_embed(title, description, ctx, colour)

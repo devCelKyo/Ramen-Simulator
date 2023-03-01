@@ -42,7 +42,8 @@ class User implements \JsonSerializable
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'money' => $this->getMoney()
+            'money' => $this->getMoney(),
+            'rebirths' => $this->getRebirth()
         ];
     }
 

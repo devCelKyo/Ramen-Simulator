@@ -4,7 +4,9 @@ import discord.ext.commands as commands
 import assets.restaurants
 
 from utils.embed import send_embed
-from utils.restaurants import get_restaurants, buy_restaurant, update_user_restaurants, claim_shops
+from utils.api.restaurants import get_restaurants, buy_restaurant, update_user_restaurants, claim_shops
+
+from utils.views.shops import ShopsView
 
 class Shops(commands.Cog):
     def __init__(self, bot):
@@ -24,8 +26,8 @@ class Shops(commands.Cog):
             description = response["message"]
             colour = discord.Colour.brand_red()
         else:
-            title = "Restaurants"
-            description = f"Here are {ctx.author.mention}'s restaurants"
+            title = "Restaurants Overview"
+            description = f"Here are all of {ctx.author.mention}'s restaurants"
             colour = discord.Colour.dark_blue()
         
         embed = discord.Embed(title=title, description=description, colour=colour)
@@ -33,12 +35,12 @@ class Shops(commands.Cog):
         
         restaurants = response["restaurants"]
         for restaurant in restaurants:
-            text = f"Capacity : level {restaurant['capacity']}/10\nQuality : level {restaurant['quality']}/10"
-            text += f"\nRamen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}"
+            text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}"
             embed.add_field(name=f"#```{restaurant['public_id']}```", value=text)
         
         embed.set_footer(text="Type rss [id] to get more details and access specific actions")
-        await ctx.reply(embed=embed)
+
+        await ctx.reply(embed=embed, view=ShopsView())
     
     @commands.command(aliases=["bs"])
     async def buy_shop(self, ctx):

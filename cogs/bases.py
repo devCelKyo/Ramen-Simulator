@@ -1,9 +1,9 @@
 import discord
 import discord.ext.commands as commands
 
-from utils.users import get_user, user_exists, create_user, claim_daily_user
+from utils.api.users import get_user, user_exists, create_user, claim_daily_user
 from utils.embed import send_embed
-from utils.restaurants import get_restaurants, buy_restaurant
+from utils.api.restaurants import get_restaurants, buy_restaurant
 
 class Bases(commands.Cog):
     def __init__(self, bot):
@@ -89,3 +89,12 @@ class Bases(commands.Cog):
             colour = discord.Colour.brand_green()
         
         await send_embed(title, description, ctx, colour)
+    
+    @commands.command()
+    async def test(self, ctx):
+        embed = discord.Embed(title="test")
+        view = discord.ui.View()
+        button = discord.ui.Button(label="test")
+        view.add_item(button)
+
+        await ctx.reply(embed=embed, view=view)

@@ -73,6 +73,7 @@ class RestaurantController extends AbstractController
         $restaurant->setQuality(1);
         $restaurant->setRamenStored(0);
         $restaurant->setWorkers(0);
+        $restaurant->setLastUpdate(new \DateTime());
 
         $user->addRestaurant($restaurant);
         // Let's not forget to actually withdraw the money (only if it's not the first restaurant)

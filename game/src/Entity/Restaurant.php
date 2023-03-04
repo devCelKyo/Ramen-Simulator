@@ -16,7 +16,6 @@ class Restaurant implements \JsonSerializable
     const RAMEN_COST = 0.2;
     const RAMEN_VALUES = array(2, 4, 8, 10, 13, 16, 19, 22, 25, 30);
     const WORKERS_SPEED = 3; // Minutes per ramen per worker
-    const WORKERS_WAGES = array(0.5, 0.5, 1, 1, 2, 2, 3, 3, 3, 4); // Money per minute
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -161,7 +160,6 @@ class Restaurant implements \JsonSerializable
 
     public function addRamenStored(int $ramen): self
     {
-        $this->owner->withdrawMoney($this->getRamenCost() * $ramen);
         $this->ramen_stored = $this->ramen_stored + $ramen;
 
         return $this;
@@ -202,19 +200,6 @@ class Restaurant implements \JsonSerializable
     public function getWorkersSpeed(): int
     {
         return self::WORKERS_SPEED;
-    }
-
-    public function getWages(): int
-    {
-        return self::WORKERS_WAGES[$this->getQuality() - 1];
-    }
-    
-    public function payWages(int $steps): self
-    {
-        $wages = $this->getWages() * $steps * $this->getWorkersSpeed();
-        $this->withdrawMoneyCached($wages);
-
-        return $this;
     }
 
     public function getPublicId(): ?string
@@ -284,10 +269,9 @@ class Restaurant implements \JsonSerializable
         $last_update->add($time_to_add);
         $this->setLastUpdate($last_update);
 
-        // Finally, let's compute how much ramen has been made, pay wages and update accordingly
+        // Finally, let's compute how much ramen has been made and update accordingly
         $ramen_made = min($this->getRamenStored(), $this->getWorkers() * $steps);
         $this->sellRamen($ramen_made);
-        $this->payWages($steps);
 
         return $this;
     }

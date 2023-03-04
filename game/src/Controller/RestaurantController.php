@@ -190,4 +190,84 @@ class RestaurantController extends AbstractController
             'given_money' => $given_money
         ]);
     }
+
+    #[Route('/refill_restaurant/{restaurant_public_id}', name: 'refill_restaurant')]
+    public function refill_restaurant(ManagerRegistry $doctrine, string $restaurant_public_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($restaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No restaurant has this ID'
+            ]);
+        }
+
+        $owner = $restaurant->getOwner();
+        
+        $ramen_cost = Restaurant::RAMEN_COST;
+        $max_ramen_to_add = $restaurant->getStorage() - $restaurant->getRamenStored();
+        if ($ramen_cost * $max_ramen_to_add <= $owner->getMoney()) {
+            $added_ramen = $max_ramen_to_add;
+        }
+        else {
+            $added_ramen = intdiv($owner->getMoney(), $ramen_cost);
+        }
+        $restaurant->addRamenStored($added_ramen);
+
+        $em->persist($owner);
+        $em->persist($restaurant);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'added_ramen' => $added_ramen,
+            'cost' => $added_ramen * $ramen_cost
+        ]);
+    }
+
+    #[Route('/refill_restaurants/{discord_id}', name: 'refill_restaurants')]
+    public function refill_restaurants(ManagerRegistry $doctrine, string $discord_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $owner = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
+        if ($owner == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'This user is not registered or does not exist.'
+            ]);
+        }
+        $restaurants = $owner->getRestaurants();
+        $total_cost = 0;
+        $total_ramen_added = 0;
+        $ramen_cost = Restaurant::RAMEN_COST;
+
+        foreach ($restaurants as $restaurant) {
+            $max_ramen_to_add = $restaurant->getStorage() - $restaurant->getRamenStored();
+            if ($ramen_cost * $max_ramen_to_add <= $owner->getMoney()) {
+                $added_ramen = $max_ramen_to_add;
+            }
+            else {
+                $added_ramen = intdiv($owner->getMoney(), $ramen_cost);
+            }
+            $cost = $added_ramen * $ramen_cost;
+            $restaurant->addRamenStored($added_ramen);
+            $owner->withdrawMoney($cost);
+
+            $total_ramen_added += $added_ramen;
+            $total_cost += $cost;
+
+            $em->persist($restaurant);
+        }
+
+        $em->persist($owner);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'total_added_ramen' => $total_ramen_added,
+            'total_cost' => $total_cost
+        ]);
+    }
+
 }

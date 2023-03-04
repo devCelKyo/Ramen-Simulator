@@ -3,9 +3,8 @@ import discord.ext.commands as commands
 
 import assets.restaurants
 
+import utils.api.restaurants
 from utils.embed import send_embed
-from utils.api.restaurants import get_restaurants, buy_restaurant, update_user_restaurants, claim_shops
-
 from utils.views.shops import ShopsView
 
 class Shops(commands.Cog):
@@ -18,9 +17,9 @@ class Shops(commands.Cog):
         Lists all the Restaurants owned
         '''
         discord_id = ctx.author.id
-        update_user_restaurants(discord_id)
-        response = get_restaurants(discord_id)
-
+        utils.api.restaurants.update_user_restaurants(discord_id)
+        response = utils.api.restaurants.get_restaurants(discord_id)
+        
         if response["error"] == "True":
             title = "Error !"
             description = response["message"]
@@ -35,7 +34,8 @@ class Shops(commands.Cog):
         
         restaurants = response["restaurants"]
         for restaurant in restaurants:
-            text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}"
+            text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}\n"
+            text += f"Workers : {restaurant['workers']}"
             embed.add_field(name=f"#```{restaurant['public_id']}```", value=text)
         
         embed.set_footer(text="Type rss [id] to get more details and access specific actions")
@@ -48,18 +48,10 @@ class Shops(commands.Cog):
         Buys a shop if available
         '''
         discord_id = ctx.author.id
-        response = buy_restaurant(discord_id)
-
-        if response["error"] == "True":
-            title = "Error !"
-            description = response["message"]
-            colour = discord.Colour.brand_red()
-        else:
-            title = "Restaurant Purchase"
-            description = f"You succesfully purchased a restaurant!"
-            colour = discord.Colour.brand_green()
+        title, description, colour = utils.api.restaurants.buy_restaurant(discord_id)
+        embed = discord.Embed(title=title, description=description, colour=colour)
         
-        await send_embed(title, description, ctx, colour)
+        await ctx.reply(embed=embed)
     
     @commands.command(aliases=["sc"])
     async def shops_claim(self, ctx):
@@ -67,15 +59,8 @@ class Shops(commands.Cog):
         Claim shops if any
         '''
         discord_id = ctx.author.id
-        response = claim_shops(discord_id)
-
-        if response["error"] == "True":
-            title = "Error !"
-            description = response["message"]
-            colour = discord.Colour.brand_red()
-        else:
-            title = "Revenue Redeemed!"
-            description = f"You redeemed what your restaurants earned and got {response['given_money']}両!"
-            colour = discord.Colour.brand_green()
+        title, description, colour, img_url = utils.api.restaurants.claim_shops(discord_id)
+        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_image(url=img_url)
         
-        await send_embed(title, description, ctx, colour)
+        await ctx.reply(embed=embed)

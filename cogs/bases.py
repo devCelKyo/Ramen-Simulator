@@ -1,6 +1,8 @@
 import discord
 import discord.ext.commands as commands
 
+import assets.restaurants
+
 from utils.api.users import get_user, user_exists, create_user, claim_daily_user
 from utils.embed import send_embed
 from utils.api.restaurants import get_restaurants, buy_restaurant
@@ -22,14 +24,10 @@ class Bases(commands.Cog):
         '''
         Pong ?
         '''
-        await send_embed("Pong", "Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere", ctx)
-    
-    @commands.command()
-    async def help_game(self, ctx):
-        '''
-        To get help on how to get started
-        '''
-        await ctx.reply("Run the rstart command to start playing!")
+        embed = discord.Embed(title="Pong", description="Bah ouai jai trouvé comment on fait siuuuuuu et c'est surement pas grâce à la doc qui pue sa mere",
+                              colour=discord.Colour.dark_gold())
+        
+        await ctx.reply(embed=embed)
 
     @commands.command()
     async def start(self, ctx):
@@ -54,16 +52,17 @@ class Bases(commands.Cog):
         user_response = get_user(discord_id)
 
         if user_response["error"] == "True":
-            await send_embed("Error : Not registered",
-                             "You are not registered! Please run the rstart command to start playing.",
-                             ctx,
-                             discord.Colour.brand_red())
+            embed = discord.Embed(title="Error : Not registered", description="You are not registered! Please run the rstart command to start playing.",
+                              colour=discord.Colour.brand_red())
+            await ctx.reply(embed=embed)
         else:
             money = user_response["user"]["money"]
             embed = discord.Embed(
                 title="Profile",
                 colour=discord.Colour.dark_blue()
             )
+
+            embed.set_thumbnail(url=assets.restaurants.SHOP)
 
             embed.add_field(name="Mention", value=ctx.author.mention)
             embed.add_field(name="Money", value=f"{money} 両")
@@ -83,12 +82,17 @@ class Bases(commands.Cog):
             title = "Bi-daily claim : Failed!"
             description = f"Claim is not ready yet. Time remaining : {response['time_remaining']}"
             colour = discord.Colour.brand_red()
+            img_url = assets.restaurants.FAIL
         else:
             title = "Bi-daily claim : Success!"
             description = f"You claimed your daily reward ! +{response['money_given']}両"
             colour = discord.Colour.brand_green()
+            img_url = assets.restaurants.RYO
         
-        await send_embed(title, description, ctx, colour)
+        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_image(url=img_url)
+
+        await ctx.reply(embed=embed)
     
     @commands.command()
     async def test(self, ctx):

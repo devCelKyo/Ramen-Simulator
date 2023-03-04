@@ -11,6 +11,6 @@ async def send_embed(title, description, ctx, colour=discord.Colour.dark_gold(),
         await ctx.send_message(embed=embed)
     if followup:
         await ctx.send(embed=embed)
-        
-    await ctx.reply(embed=embed)
+    if not (interaction or followup):   
+        await ctx.reply(embed=embed)
     

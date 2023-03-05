@@ -7,7 +7,7 @@ def get_restaurants(discord_id):
     return response
 
 def buy_restaurant(discord_id):
-    response = requests.get(f"http://localhost:8000/restaurants/buy_restaurant/{discord_id}")
+    response = requests.get(f"http://localhost:8000/restaurants/add_restaurant/{discord_id}").json()
     if response["error"] == "True":
         title = "Error !"
         description = response["message"]
@@ -34,9 +34,15 @@ def claim_shops(discord_id):
         img_url = assets.restaurants.FAIL
     else:
         title = "Revenue Redeemed!"
-        description = f"You redeemed what your restaurants earned and got {response['given_money']}両!"
-        colour = discord.Colour.brand_green()
-        img_url = assets.restaurants.RYO
+        given_money = response['given_money']
+        if given_money == 0:
+            description = "There was nothing to claim... Get to work!"
+            colour = discord.Colour.dark_red()
+            img_url = assets.restaurants.NO_MONEY
+        else:
+            description = f"You redeemed what your restaurants earned and got {response['given_money']}両!"
+            colour = discord.Colour.brand_green()
+            img_url = assets.restaurants.RYO
     
     return title, description, colour, img_url
 

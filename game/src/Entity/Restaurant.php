@@ -55,6 +55,13 @@ class Restaurant implements \JsonSerializable
         $this->public_id = $letters[random_int(0, 25)] . $letters[random_int(0, 25)];
         $this->public_id .= $digits[random_int(0, 9)] .  $digits[random_int(0, 9)];
         $this->public_id .= $letters[random_int(0, 25)] . $letters[random_int(0, 25)];
+
+        $this->capacity = 1;
+        $this->quality = 1;
+        $this->ramen_stored = 0;
+        $this->money_cached = 0;
+        $this->workers = 0;
+        $this->last_update = new \DateTime();
     }
 
     public function jsonSerialize(): mixed 

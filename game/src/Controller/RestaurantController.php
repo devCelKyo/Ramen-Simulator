@@ -39,7 +39,7 @@ class RestaurantController extends AbstractController
     }
 
     #[Route('/add_restaurant/{discord_id}', name: 'add_restaurant')]
-    public function add_restaurants(ManagerRegistry $doctrine, string $discord_id): JsonResponse
+    public function add_restaurant(ManagerRegistry $doctrine, string $discord_id): JsonResponse
     {
         $user = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
         if ($user == null) {
@@ -69,13 +69,8 @@ class RestaurantController extends AbstractController
 
         // Arrived there, it should be okay for verifications (!), so let's construct a restaurant, add it to the user object and return a nice JSON
         $restaurant = new Restaurant();
-        $restaurant->setCapacity(1);
-        $restaurant->setQuality(1);
-        $restaurant->setRamenStored(0);
-        $restaurant->setWorkers(0);
-        $restaurant->setLastUpdate(new \DateTime());
-
         $user->addRestaurant($restaurant);
+        
         // Let's not forget to actually withdraw the money (only if it's not the first restaurant)
         if ($count >= 1) {
             $user->withdrawMoney(Restaurant::PRICE);

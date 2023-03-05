@@ -24,6 +24,7 @@ class UserController extends AbstractController
         $user = new User();
         $user->setDiscordId($discord_id);
         $user->setMoney(50);
+        $user->setRebirth(0);
 
         $em->persist($user);
         $em->flush();

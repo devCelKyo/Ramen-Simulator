@@ -266,10 +266,10 @@ class RestaurantController extends AbstractController
     }
 
     #[Route('/add_workers/{restaurant_public_id}', name: 'add_workers')]
-    public function add_workers(ManagerRegistry $doctrine, Request $request, string $restaurant_public_id): JsonResponse
+    public function add_workers(ManagerRegistry $doctrine, string $restaurant_public_id): JsonResponse
     {
         /**
-         * This route should be used by sending a POST request containing a JSON with the keys 'discord_id' and 'workers_to_add'
+         * This route should be used by sending a POST request containing a JSON with the key 'workers_to_add'
          */
 
         $em = $doctrine->getManager();
@@ -280,8 +280,7 @@ class RestaurantController extends AbstractController
                 'message' => 'No restaurant has this ID.'
             ]);
         }
-        $owner_id = $request->request->get('discord_id');
-        $owner = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $owner_id]);
+        $owner = $restaurant->getOwner();
 
         $workers_to_add = $request->request->get('workers_to_add');
         $workers_cost = $restaurant->getWorkersCost();
@@ -306,6 +305,52 @@ class RestaurantController extends AbstractController
             'error' => 'False',
             'added_workers' => $workers_to_add,
             'total_cost' => $total_cost
+        ]);
+    }
+
+    #[Route('/upgrade/{restaurant_public_id}/{upgrade_type}', name: 'upgrade_capacity')]
+    public function upgrade_capacity(ManagerRegistry $doctrine, string $restaurant_public_id, string $upgrade_type): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($restaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No restaurant has this ID.'
+            ]);
+        }
+        $owner = $restaurant->getOwner();
+        if ($upgrade_type == 'capacity') {
+           $upgrade_cost = $restaurant->getUpgradeCapacityPrice();
+        }
+        else {
+            $upgrade_cost = $restaurant->getUpgradeQualityPrice();
+        }
+
+        if ($owner->getMoney() < $upgrade_cost) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You don\'t have enough money.'
+            ]);
+        }
+        
+        // All verifications done, so lets withdraw money, yada yada yada
+        if ($upgrade_type == 'capacity') {
+            $restaurant->upgradeCapacity();
+        }
+        else {
+            
+            $restaurant->upgradeQuality();
+        }
+
+        $em->persist($owner);
+        $em->persist($restaurant);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'upgrade_cost' => $upgrade_cost,
+            'upgrade_type' => $upgrade_type
         ]);
     }
 

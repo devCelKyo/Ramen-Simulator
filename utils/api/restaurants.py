@@ -6,6 +6,10 @@ def get_restaurants(discord_id):
     response = requests.get(f"http://localhost:8000/restaurants/get_restaurants/{discord_id}").json()
     return response
 
+def get_restaurant(restaurant_public_id, discord_id):
+    response = requests.post(f"http://localhost:8000/restaurants/get_restaurant/{restaurant_public_id}", data={discord_id:discord_id}).json()
+    
+
 def buy_restaurant(discord_id):
     response = requests.get(f"http://localhost:8000/restaurants/add_restaurant/{discord_id}").json()
     if response["error"] == "True":

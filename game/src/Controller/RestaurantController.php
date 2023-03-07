@@ -38,6 +38,34 @@ class RestaurantController extends AbstractController
         ]);
     }
 
+    #[Route('/get_restaurant/{restaurant_public_id}', name: 'get_restaurant')]
+    public function get_restaurant(ManagerRegistry $doctrine, Request $request, string $restaurant_public_id): JsonResponse
+    {
+        $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($restaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No restaurant has this ID.'
+            ]);
+        }
+        
+        $user_id = $request->request->get('discord_id');
+        $owner_id = $restaurant->getOwner()->getDiscordId();
+
+        if ($owner_id != $user_id) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You are not allowed to see this restaurant'
+            ]);
+        }
+
+        $restaurant->update();
+        return $this->json([
+            'error' => 'False',
+            'restaurant' => $restaurant->jsonSerialize()
+        ]);
+    }
+
     #[Route('/add_restaurant/{discord_id}', name: 'add_restaurant')]
     public function add_restaurant(ManagerRegistry $doctrine, string $discord_id): JsonResponse
     {

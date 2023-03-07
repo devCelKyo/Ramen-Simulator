@@ -16,6 +16,7 @@ class Restaurant implements \JsonSerializable
     const RAMEN_COST = 0.2;
     const RAMEN_VALUES = array(2, 4, 8, 10, 13, 16, 19, 22, 25, 30);
     const WORKERS_SPEED = 3; // Minutes per ramen per worker
+    const WORKERS_COST = 100;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -209,6 +210,11 @@ class Restaurant implements \JsonSerializable
         return self::WORKERS_SPEED;
     }
 
+    public function getWorkersCost(): int
+    {
+        return self::WORKERS_COST;
+    }
+
     public function getPublicId(): ?string
     {
         return $this->public_id;
@@ -236,13 +242,6 @@ class Restaurant implements \JsonSerializable
     public function addMoneyCached(int $money): self
     {
         $this->money_cached = $this->money_cached + $money;
-
-        return $this;
-    }
-
-    public function withdrawMoneyCached(int $money): self
-    {
-        $this->money_cached = max($this->money_cached - $money, 0);
 
         return $this;
     }

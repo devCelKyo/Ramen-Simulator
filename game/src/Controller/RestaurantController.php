@@ -265,4 +265,48 @@ class RestaurantController extends AbstractController
         ]);
     }
 
+    #[Route('/add_workers/{restaurant_public_id}', name: 'add_workers')]
+    public function add_workers(ManagerRegistry $doctrine, Request $request, string $restaurant_public_id): JsonResponse
+    {
+        /**
+         * This route should be used by sending a POST request containing a JSON with the keys 'discord_id' and 'workers_to_add'
+         */
+
+        $em = $doctrine->getManager();
+        $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($restaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No restaurant has this ID.'
+            ]);
+        }
+        $owner_id = $request->request->get('discord_id');
+        $owner = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $owner_id]);
+
+        $workers_to_add = $request->request->get('workers_to_add');
+        $workers_cost = $restaurant->getWorkersCost();
+        $total_cost = $workers_cost * $workers_to_add;
+
+        if ($owner->getMoney() < $total_cost) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You don\'t have enough money.'
+            ]);
+        }
+
+        // All verifications are done, we can add the workers and withdraw the money
+        $restaurant->addWorkers($workers_to_add);
+        $owner->withdrawMoney($total_cost);
+
+        $em->persist($owner);
+        $em->persist($restaurant);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'added_workers' => $workers_to_add,
+            'total_cost' => $total_cost
+        ]);
+    }
+
 }

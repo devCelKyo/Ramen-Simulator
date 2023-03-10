@@ -97,6 +97,7 @@ class RestaurantController extends AbstractController
 
         // Arrived there, it should be okay for verifications (!), so let's construct a restaurant, add it to the user object and return a nice JSON
         $restaurant = new Restaurant();
+        $restaurant->setWorkers(10); // SHOULD BE REMOVED AS SOON AS WORKERS CAN BE BOUGHT!!!!
         $user->addRestaurant($restaurant);
         
         // Let's not forget to actually withdraw the money (only if it's not the first restaurant)
@@ -337,7 +338,7 @@ class RestaurantController extends AbstractController
     }
 
     #[Route('/upgrade/{restaurant_public_id}/{upgrade_type}', name: 'upgrade_capacity')]
-    public function upgrade_capacity(ManagerRegistry $doctrine, string $restaurant_public_id, string $upgrade_type): JsonResponse
+    public function upgrade(ManagerRegistry $doctrine, string $restaurant_public_id, string $upgrade_type): JsonResponse
     {
         $em = $doctrine->getManager();
         $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);

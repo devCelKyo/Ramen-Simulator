@@ -5,7 +5,7 @@ import assets.restaurants
 
 import utils.api.restaurants
 from utils.embed import send_embed
-from utils.views.shops import ShopsView
+from utils.views.shops import ShopsView, SeeShopView
 
 class Shops(commands.Cog):
     def __init__(self, bot):
@@ -40,7 +40,7 @@ class Shops(commands.Cog):
         
         embed.set_footer(text="Type rss [id] to get more details and access specific actions")
 
-        await ctx.reply(embed=embed, view=ShopsView())
+        await ctx.reply(embed=embed, view=ShopsView(ctx.author))
     
     @commands.command(aliases=["ss"])
     async def see_shop(self, ctx, public_id):
@@ -53,10 +53,23 @@ class Shops(commands.Cog):
             title = "Error !"
             description = response["message"]
             colour = discord.Colour.brand_red()
-        else:
-            restaurant = response["restaurant"]
-            title = f"Restaurant #```{restaurant['public_id']}```"
-            ## WIP ##
+
+            embed = discord.Embed(title=title, description=description, colour=colour)
+            await ctx.reply(embed=embed)
+            return
+        
+        restaurant = response["restaurant"]
+        title = f"Restaurant #```{restaurant['public_id']}```"
+        description = f"Capacity : {restaurant['capacity']} / 10\n"
+        description += f"Quality : {restaurant['quality']} / 10\n"
+        description += f"Workers : {restaurant['workers']}\n"
+        description += f"Ramen stored : {restaurant['ramen_stored']} / {restaurant['max_storage']}\n"
+        description += f"Money available : {restaurant['money_cached']}\n"
+        colour = discord.Colour.blurple()
+
+        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_thumbnail(url=assets.restaurants.RAMEN)
+        await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id']))
     
     @commands.command(aliases=["bs"])
     async def buy_shop(self, ctx):

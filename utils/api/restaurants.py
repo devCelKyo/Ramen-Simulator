@@ -7,18 +7,31 @@ def get_restaurants(discord_id):
     return response
 
 def get_restaurant(restaurant_public_id, discord_id):
-    response = requests.post(f"http://localhost:8000/restaurants/get_restaurant/{restaurant_public_id}", data={discord_id:discord_id}).json()
-    
+    response = requests.post(f"http://localhost:8000/restaurants/get_restaurant/{restaurant_public_id}", data={"discord_id":discord_id}).json()
+    return response
 
 def buy_restaurant(discord_id):
     response = requests.get(f"http://localhost:8000/restaurants/add_restaurant/{discord_id}").json()
     if response["error"] == "True":
-        title = "Error !"
+        title = "Error!"
         description = response["message"]
         colour = discord.Colour.brand_red()
     else:
         title = "Restaurant Purchase"
         description = f"You succesfully purchased a restaurant!"
+        colour = discord.Colour.brand_green()
+    
+    return title, description, colour
+
+def upgrade(restaurant_public_id, upgrade_type):
+    response = requests.get(f"http://localhost:8000/restaurants/upgrade/{restaurant_public_id}/{upgrade_type}").json()
+    if response["error"] == "True":
+        title = "Error!"
+        description = response["message"]
+        colour = discord.Colour.brand_red()
+    else:
+        title = "Upgrade successful!"
+        description = "You succesfully upgraded your restaurant!"
         colour = discord.Colour.brand_green()
     
     return title, description, colour

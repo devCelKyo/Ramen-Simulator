@@ -59,7 +59,7 @@ class SeeShopView(discord.ui.View):
 
         await interaction.followup.send(embed=embed)
     
-    @discord.ui.button(label="Upgrade Quality", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label=f"Upgrade Quality", style=discord.ButtonStyle.primary)
     async def uq_callback(self, interaction, button):
         button.disabled = True
         button.label = "---"
@@ -69,3 +69,6 @@ class SeeShopView(discord.ui.View):
         embed = discord.Embed(title=title, description=description, colour=colour)
 
         await interaction.followup.send(embed=embed)
+    
+    async def interaction_check(self, interaction: discord.Interaction):
+        return interaction.user.id == self.author.id

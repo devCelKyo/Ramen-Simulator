@@ -75,7 +75,9 @@ class Restaurant implements \JsonSerializable
             'ramen_stored' => $this->ramen_stored,
             'max_storage' => $this->getStorage(),
             'workers' => $this->workers,
-            'money_cached' => $this->getMoneyCached()
+            'money_cached' => $this->getMoneyCached(),
+            'capacity_upgrade_price' => $this->getUpgradeCapacityPrice(),
+            'quality_upgrade_price' => $this->getUpgradeQualityPrice()
         ];
     }
 

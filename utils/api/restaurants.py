@@ -31,7 +31,7 @@ def upgrade(restaurant_public_id, upgrade_type):
         colour = discord.Colour.brand_red()
     else:
         title = "Upgrade successful!"
-        description = "You succesfully upgraded your restaurant!"
+        description = f"You succesfully upgraded the {response['upgrade_type']} of the restaurant #```{restaurant_public_id}```"
         colour = discord.Colour.brand_green()
     
     return title, description, colour

@@ -77,3 +77,21 @@ def refill_all(discord_id):
         img_url = assets.restaurants.RAMEN
     
     return title, description, colour, img_url
+
+def add_workers(discord_id, restaurant_public_id, workers_amount):
+    params = {"discord_id":discord_id, "workers_to_add":workers_amount}
+    response = requests.post(f"http://localhost:8000/restaurants/add_workers/{restaurant_public_id}",
+                             data=params).json()
+    
+    if response["error"] == "True":
+        title = "Error !"
+        description = response["message"]
+        colour = discord.Colour.brand_red()
+        img_url = None
+    else:
+        title = "Workers hired!"
+        description = f"You spent {response['total_cost']}両 and hired {response['added_workers']} new workers!"
+        colour = discord.Colour.brand_green()
+        img_url = None
+    
+    return title, description, colour, img_url

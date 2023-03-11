@@ -72,7 +72,10 @@ class Shops(commands.Cog):
         upgrade_costs = f"Capacity : {restaurant['capacity_upgrade_price']}\n"
         upgrade_costs += f"Quality : {restaurant['quality_upgrade_price']}"
         embed.add_field(name="Upgrade costs", value=upgrade_costs)
-        await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id']))
+
+        
+
+        await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id'], ctx.author))
     
     @commands.command(aliases=["bs"])
     async def buy_shop(self, ctx):
@@ -95,4 +98,13 @@ class Shops(commands.Cog):
         embed = discord.Embed(title=title, description=description, colour=colour)
         embed.set_image(url=img_url)
         
+        await ctx.reply(embed=embed)
+    
+    @commands.command(aliases=["aw"])
+    async def add_workers(self, ctx, restaurant_public_id, workers_amount):
+        discord_id = ctx.author.id
+        title, description, colour, img_url = utils.api.restaurants.add_workers(discord_id, restaurant_public_id, workers_amount)
+        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_image(url=img_url)
+
         await ctx.reply(embed=embed)

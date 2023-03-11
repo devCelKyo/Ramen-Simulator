@@ -44,8 +44,9 @@ class ShopsView(discord.ui.View):
         return interaction.user.id == self.author.id
 
 class SeeShopView(discord.ui.View):
-    def __init__(self, restaurant_public_id):
+    def __init__(self, restaurant_public_id, author):
         super().__init__()
+        self.author = author
         self.public_id = restaurant_public_id
 
     @discord.ui.button(label="Upgrade Capacity", style=discord.ButtonStyle.primary)

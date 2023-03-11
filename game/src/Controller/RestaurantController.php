@@ -295,10 +295,11 @@ class RestaurantController extends AbstractController
     }
 
     #[Route('/add_workers/{restaurant_public_id}', name: 'add_workers')]
-    public function add_workers(ManagerRegistry $doctrine, string $restaurant_public_id): JsonResponse
+    public function add_workers(ManagerRegistry $doctrine, Request $request, string $restaurant_public_id): JsonResponse
     {
         /**
-         * This route should be used by sending a POST request containing a JSON with the key 'workers_to_add'
+         * This route should be used by sending a POST request containing a JSON with the keys 'discord_id'
+         * and 'workers_to_add'
          */
 
         $em = $doctrine->getManager();
@@ -309,7 +310,14 @@ class RestaurantController extends AbstractController
                 'message' => 'No restaurant has this ID.'
             ]);
         }
-        $owner = $restaurant->getOwner();
+        $request_discord_id = $request->request->get('discord_id');
+        $owner = $restaurant->getOwner(); // should be verified with discord_id key
+        if ($request_discord_id != $owner->getDiscordId()) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You are not allowed to manage this restaurant.'
+            ]);
+        }
 
         $workers_to_add = $request->request->get('workers_to_add');
         $workers_cost = $restaurant->getWorkersCost();

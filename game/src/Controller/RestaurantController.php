@@ -348,6 +348,7 @@ class RestaurantController extends AbstractController
                 'message' => 'No restaurant has this ID.'
             ]);
         }
+        $restaurant->update();
         $owner = $restaurant->getOwner();
         if ($upgrade_type == 'capacity') {
            $upgrade_cost = $restaurant->getUpgradeCapacityPrice();
@@ -366,10 +367,11 @@ class RestaurantController extends AbstractController
         // All verifications done, so lets withdraw money, yada yada yada
         if ($upgrade_type == 'capacity') {
             $restaurant->upgradeCapacity();
+            $owner->withdrawMoney($upgrade_cost);
         }
-        else {
-            
+        else {  
             $restaurant->upgradeQuality();
+            $owner->withdrawMoney($upgrade_cost);
         }
 
         $em->persist($owner);

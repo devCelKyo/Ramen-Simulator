@@ -99,7 +99,8 @@ class Bases(commands.Cog):
         title = "Here are the 10 best players :"
         embed = discord.Embed(title=title, colour=discord.Colour.blue())
         for user in users:
+            user_object = await self.bot.fetch_user(user['discord_id'])
             text = f"{user['rebirths']} rebirths, {user['money']}両"
-            embed.add_field(name=f"@{user['discord_id']}", value=text)
+            embed.add_field(name=user_object.mention, value=text)
         
         await ctx.reply(embed=embed)

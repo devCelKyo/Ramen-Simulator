@@ -159,10 +159,13 @@ class UserController extends AbstractController
         $query->setMaxResults(1000);
         $users = $query->getResult();
         usort($users, function($a, $b) {
-            if ($a->computeRestaurantScore() == $b->computeRestaurantScore()) {
-                return 0;
+            if ($a->getRebirth() == $b->getRebirth()) {
+                if ($a->computeRestaurantScore() == $b->computeRestaurantScore()) {
+                    return $b->getMoney() - $b->getMoney();
+                }
+                return $b->computeRestaurantScore() - $a->computeRestaurantScore();
             }
-            return ($a->computeRestaurantScore() < $b->computeRestaurantScore()) ? -1 : 1;
+            return $b->getRebirth() - $a->getRebirth();
         });
 
         $jsonUsers = [];

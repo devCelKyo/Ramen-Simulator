@@ -293,4 +293,13 @@ class Restaurant implements \JsonSerializable
 
         return $given_money;
     }
+
+    public function computeScore(): int
+    {
+        $capacityScore = ($this->getCapacity() * ($this->getCapacity() + 1)) / 2;
+        $qualityScore = ($this->getQuality() * ($this->getQuality() + 1)) / 2;
+        $workersScore = intdiv($this->getWorkers(), 10);
+
+        return $capacityScore + $qualityScore + $workersScore;
+    }
 }

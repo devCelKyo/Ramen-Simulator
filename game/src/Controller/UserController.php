@@ -156,9 +156,15 @@ class UserController extends AbstractController
         $query = $em->createQuery(
             'SELECT u FROM App\Entity\User u ORDER BY u.rebirth DESC, u.money DESC'
         );
-        $query->setMaxResults(10);
-
+        $query->setMaxResults(1000);
         $users = $query->getResult();
+        usort($users, function($a, $b) {
+            if ($a->computeRestaurantScore() == $b->computeRestaurantScore()) {
+                return 0;
+            }
+            return ($a->computeRestaurantScore() < $b->computeRestaurantScore()) ? -1 : 1;
+        });
+
         $jsonUsers = [];
         foreach($users as $user) {
             $jsonUsers[] = $user->jsonSerialize();

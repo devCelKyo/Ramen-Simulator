@@ -166,4 +166,15 @@ class User implements \JsonSerializable
     {
         return self::REBIRTH_PRICES[$this->getRebirth()];
     }
+
+    public function computeRestaurantScore(): int
+    {
+        $score = 0;
+        $restaurants = $this->getRestaurants();
+        foreach($restaurants as $restaurant) {
+            $score = $score + $restaurant->computeScore();
+        }
+
+        return $score;
+    }
 }

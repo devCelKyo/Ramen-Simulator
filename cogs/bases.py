@@ -98,9 +98,11 @@ class Bases(commands.Cog):
         users = utils.api.users.leaderboard()
         title = "Here are the 10 best players :"
         embed = discord.Embed(title=title, colour=discord.Colour.blue())
+        index = 1
         for user in users:
             user_object = await self.bot.fetch_user(user['discord_id'])
-            text = f"{user['rebirths']} rebirths, {user['money']}両"
-            embed.add_field(name=user_object.mention, value=text)
+            text = f"{user_object.mention} : {user['rebirths']} rebirths, {user['money']}両"
+            embed.add_field(name=f"#{index}", value=text, inline=False)
+            index += 1
         
         await ctx.reply(embed=embed)

@@ -272,7 +272,7 @@ class RestaurantController extends AbstractController
                 $added_ramen = $max_ramen_to_add;
             }
             else {
-                $added_ramen = intdiv($owner->getMoney(), $ramen_cost);
+                $added_ramen = intval(fdiv($owner->getMoney(), $ramen_cost));
             }
             $cost = $added_ramen * $ramen_cost;
             $restaurant->addRamenStored($added_ramen);

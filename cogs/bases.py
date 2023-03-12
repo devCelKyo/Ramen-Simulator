@@ -101,8 +101,9 @@ class Bases(commands.Cog):
         index = 1
         for user in users:
             user_object = await self.bot.fetch_user(user['discord_id'])
-            text = f"{user_object.mention} : {user['rebirths']} rebirths, {user['restaurant_score']} restaurant score,{user['money']}両"
+            text = f"{user_object.mention} : {user['rebirths']} rebirths, {user['restaurant_score']} upgrade score, {user['money']}両"
             embed.add_field(name=f"#{index}", value=text, inline=False)
             index += 1
+        embed.set_thumbnail(url=assets.restaurants.HOKAGE)
         
         await ctx.reply(embed=embed)

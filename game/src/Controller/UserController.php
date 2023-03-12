@@ -154,7 +154,7 @@ class UserController extends AbstractController
     {
         $em = $doctrine->getManager();
         $query = $em->createQuery(
-            'SELECT u FROM App\Entity\User u ORDER BY u.rebirth, u.money DESC'
+            'SELECT u FROM App\Entity\User u ORDER BY u.rebirth DESC, u.money DESC'
         );
         $query->setMaxResults(10);
 

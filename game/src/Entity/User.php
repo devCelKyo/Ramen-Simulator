@@ -145,6 +145,13 @@ class User implements \JsonSerializable
         return $this;
     }
 
+    public function addRebirth(): self
+    {
+        $this->rebirth = $this->rebirth + 1;
+
+        return $this;
+    }
+
     public function getRebirthMultiplier(): int
     {
         if ($this->rebirth == null || $this->rebirth == 0) {
@@ -153,5 +160,10 @@ class User implements \JsonSerializable
         else {
             return pow(2, $this->rebirth);
         }
+    }
+
+    public function getRebirthPrice(): int
+    {
+        return self::REBIRTH_PRICES[$this->getRebirth()];
     }
 }

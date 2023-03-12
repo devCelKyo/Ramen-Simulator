@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/users', name: 'users')]
 class UserController extends AbstractController
 {
     #[Route('/create_user', name: 'create_user')]
@@ -104,5 +105,47 @@ class UserController extends AbstractController
         $em->flush();
 
         return $json;
+    }
+
+    #[Route('/rebirth/{discord_id}', name: 'rebirth')]
+    public function rebirth(ManagerRegistry $doctrine, string $discord_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $user = $doctrine->getRepository(User::class)->findOneById(['discord_id' => $discord_id]);
+        if ($user == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'This user does not exist.'
+            ]);
+        }
+
+        // Check the balance and see whether it's possible to rebirth or not
+        if ($user->getMoney() < $user->getRebirthPrice()) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'Insufficient funds!'
+            ]);
+        }
+
+        // All verifications done, can now rebirth.
+        // (1) Reset the money
+        $user->setMoney(20);
+
+        // (2) Reset the restaurants
+        $restaurants = $user->getRestaurants();
+        foreach ($restaurants as $restaurant) {
+            $em->remove($restaurant);
+        }
+
+        // (3) Increment rebirth count
+        $user->addRebirth();
+
+        $em->persist($user);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'new_multiplier' => $user->getRebirthMultiplier()
+        ]);
     }
 }

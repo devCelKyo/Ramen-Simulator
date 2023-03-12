@@ -93,12 +93,3 @@ class Bases(commands.Cog):
         embed.set_image(url=img_url)
 
         await ctx.reply(embed=embed)
-    
-    @commands.command()
-    async def test(self, ctx):
-        embed = discord.Embed(title="test")
-        view = discord.ui.View()
-        button = discord.ui.Button(label="test")
-        view.add_item(button)
-
-        await ctx.reply(embed=embed, view=view)

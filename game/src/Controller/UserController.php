@@ -111,7 +111,7 @@ class UserController extends AbstractController
     public function rebirth(ManagerRegistry $doctrine, string $discord_id): JsonResponse
     {
         $em = $doctrine->getManager();
-        $user = $doctrine->getRepository(User::class)->findOneById(['discord_id' => $discord_id]);
+        $user = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
         if ($user == null) {
             return $this->json([
                 'error' => 'True',

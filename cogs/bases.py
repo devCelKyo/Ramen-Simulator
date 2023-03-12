@@ -3,9 +3,8 @@ import discord.ext.commands as commands
 
 import assets.restaurants
 
+from utils.views.home import HomeView
 from utils.api.users import get_user, user_exists, create_user, claim_daily_user
-from utils.embed import send_embed
-from utils.api.restaurants import get_restaurants, buy_restaurant
 
 class Bases(commands.Cog):
     def __init__(self, bot):
@@ -68,7 +67,7 @@ class Bases(commands.Cog):
             embed.add_field(name="Money", value=f"{money} 両")
             embed.add_field(name="Rebirths", value=f"{user_response['user']['rebirths']}")
 
-            await ctx.reply(embed=embed)
+            await ctx.reply(embed=embed, view=HomeView(ctx.author))
 
     @commands.command(aliases=["dc"])
     async def daily_claim(self, ctx):

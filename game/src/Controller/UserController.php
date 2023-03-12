@@ -148,4 +148,25 @@ class UserController extends AbstractController
             'new_multiplier' => $user->getRebirthMultiplier()
         ]);
     }
+
+    #[Route('/leaderboard', name: 'leaderboard')]
+    public function leaderboard(ManagerRegistry $doctrine): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $query = $em->createQuery(
+            'SELECT u FROM App\Entity\User u ORDER BY u.rebirth, u.money DESC'
+        );
+        $query->setMaxResults(10);
+
+        $users = $query->getResult();
+        $jsonUsers = [];
+        foreach($users as $user) {
+            $jsonUsers[] = $user->jsonSerialize();
+        }
+
+        return $this->json([
+            'error' => 'False',
+            'users' => $jsonUsers
+        ]);
+    }
 }

@@ -29,3 +29,10 @@ def rebirth(discord_id):
         description = f"Your money multiplier is now x{response['new_multiplier']}"
         colour = discord.Colour.brand_green()
     return title, description, colour
+
+def leaderboard():
+    response = requests.get("http://localhost:8000/users/leaderboard").json()
+    if response["error"] != "False":
+        raise Exception("Weird stuff happening")
+
+    return response["users"]

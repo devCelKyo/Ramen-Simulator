@@ -2,9 +2,9 @@ import discord
 import discord.ext.commands as commands
 
 import assets.restaurants
+import utils.api.users
 
 from utils.views.home import HomeView
-from utils.api.users import get_user, user_exists, create_user, claim_daily_user
 
 class Bases(commands.Cog):
     def __init__(self, bot):
@@ -35,11 +35,11 @@ class Bases(commands.Cog):
         '''
         discord_id = ctx.author.id
         # Check if discord User already has a User registered
-        if user_exists(discord_id):
+        if utils.api.users.user_exists(discord_id):
             await ctx.reply("You are already registered")
         # If not, create new User with API
         else:
-            create_user(discord_id)
+            utils.api.users.create_user(discord_id)
             await ctx.reply("Registration complete!")
     
     @commands.command()
@@ -48,7 +48,7 @@ class Bases(commands.Cog):
         To see the dashboard
         '''
         discord_id = ctx.author.id
-        user_response = get_user(discord_id)
+        user_response = utils.api.users.get_user(discord_id)
 
         if user_response["error"] == "True":
             embed = discord.Embed(title="Error : Not registered", description="You are not registered! Please run the rstart command to start playing.",
@@ -75,7 +75,7 @@ class Bases(commands.Cog):
         You can claim a reward every 12 hours, don't forget it!
         '''
         discord_id = ctx.author.id
-        response = claim_daily_user(discord_id)
+        response = utils.api.users.claim_daily_user(discord_id)
 
         if response["error"] == "True":
             title = "Bi-daily claim : Failed!"
@@ -91,4 +91,15 @@ class Bases(commands.Cog):
         embed = discord.Embed(title=title, description=description, colour=colour)
         embed.set_image(url=img_url)
 
+        await ctx.reply(embed=embed)
+    
+    @commands.command(aliases=["lb"])
+    async def leaderboard(self, ctx):
+        users = utils.api.users.leaderboard()
+        title = "Here are the 10 best players :"
+        embed = discord.Embed(title=title, colour=discord.Colour.blue())
+        for user in users:
+            text = f"{user['rebirth']} rebirths, {user['money']}両"
+            embed.add_field(name=f"@{user['discord_id']}", value=text)
+        
         await ctx.reply(embed=embed)

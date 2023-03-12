@@ -71,6 +71,7 @@ class Shops(commands.Cog):
         embed.set_thumbnail(url=assets.restaurants.RAMEN)
         upgrade_costs = f"Capacity : {restaurant['capacity_upgrade_price']}\n"
         upgrade_costs += f"Quality : {restaurant['quality_upgrade_price']}"
+        embed.add_field(name="Upgrade costs", value=upgrade_costs)
 
         await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id'], ctx.author))
     

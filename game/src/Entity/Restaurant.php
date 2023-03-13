@@ -12,7 +12,7 @@ class Restaurant implements \JsonSerializable
 {
     const UPGRADE_PRICES = array(1000, 5000, 10000, 20000, 40000, 80000, 160000, 320000, 640000);
     const PRICE = 30000;
-    const STORAGES = array(100, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000);
+    const STORAGES = array(100, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000);
     const RAMEN_COST = 0.2;
     const RAMEN_VALUES = array(2, 4, 8, 10, 13, 16, 19, 22, 25, 30);
     const WORKERS_SPEED = 3; // Minutes per ramen per worker

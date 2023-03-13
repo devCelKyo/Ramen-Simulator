@@ -117,8 +117,11 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
-    public function getUpgradeCapacityPrice(): int
+    public function getUpgradeCapacityPrice()
     {
+        if ($this->quality == count(self:UPGRADE_PRICES) + 1) {
+            return "MAXXED!";
+        }
         return self::UPGRADE_PRICES[$this->getCapacity() - 1];
     }
 
@@ -151,8 +154,11 @@ class Restaurant implements \JsonSerializable
         return self::RAMEN_COST;
     }
 
-    public function getUpgradeQualityPrice(): int
+    public function getUpgradeQualityPrice()
     {
+        if ($this->quality == count(self:UPGRADE_PRICES) + 1) {
+            return "MAXXED!";
+        }
         return self::UPGRADE_PRICES[$this->getQuality() - 1];
     }
 
@@ -298,7 +304,7 @@ class Restaurant implements \JsonSerializable
     {
         $capacityScore = ($this->getCapacity() * ($this->getCapacity() + 1)) / 2;
         $qualityScore = ($this->getQuality() * ($this->getQuality() + 1)) / 2;
-        $workersScore = intdiv($this->getWorkers(), 10);
+        $workersScore = intdiv($this->getWorkers(), 50);
 
         return $capacityScore + $qualityScore + $workersScore;
     }

@@ -156,7 +156,7 @@ class Restaurant implements \JsonSerializable
 
     public function getUpgradeQualityPrice()
     {
-        if ($this->quality == count(self:UPGRADE_PRICES) + 1) {
+        if ($this->quality == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
         return self::UPGRADE_PRICES[$this->getQuality() - 1];

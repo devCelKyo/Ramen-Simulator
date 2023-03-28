@@ -22,6 +22,7 @@ final class Version20230327225810 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE restaurant ADD stars INT DEFAULT NULL');
         $this->addSql('ALTER TABLE user ADD restaurant_slots INT DEFAULT NULL');
+        $this->addSql('UPDATE user SET restaurant_slots = 1');
     }
 
     public function down(Schema $schema): void

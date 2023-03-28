@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RestaurantRepository;
+use App\Utils\Utils;
+
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Util\Debug;
@@ -10,13 +12,20 @@ use Doctrine\Common\Util\Debug;
 #[ORM\Entity(repositoryClass: RestaurantRepository::class)]
 class Restaurant implements \JsonSerializable
 {
-    const UPGRADE_PRICES = array(1000, 5000, 10000, 20000, 40000, 80000, 160000, 320000, 640000);
-    const PRICE = 30000;
-    const STORAGES = array(100, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000);
-    const RAMEN_COST = 0.2;
-    const RAMEN_VALUES = array(2, 4, 8, 10, 13, 16, 19, 22, 25, 30);
+    // GAMEPLAY CONSTANTS FOR BALANCING
+
+    const UPGRADE_PRICES = array("1000", "5000", "10000", "20000", "40000", "80000", "160000", "320000", "640000");
+    const PRICE = "30000";
+    const STORAGES = array("100", "500", "1000", "2000", "4000", "8000", "16000", "32000", "64000", "128000");
+    const RAMEN_COST = 1;
+    const RAMEN_VALUES = array(4, 6, 8, 10, 12, 14, 16, 18, 20, 22);
     const WORKERS_SPEED = 3; // Minutes per ramen per worker
     const WORKERS_COST = 100;
+    
+    const STAR_WORKERS_SPEED_COEF = 0.95;
+    const STAR_UPGRADE_PRICES_COEF = 10;
+    const STAR_STORAGE_COEF = 10;
+    const STAR_RAMEN_VALUES_COEF = 10;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,23 +36,26 @@ class Restaurant implements \JsonSerializable
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $stars = null;
+
     #[ORM\Column]
     private ?int $capacity = null;
 
     #[ORM\Column]
     private ?int $quality = null;
 
-    #[ORM\Column]
-    private ?int $ramen_stored = null;
+    #[ORM\Column(type: Types::OBJECT, nullable: true)]
+    private ?\GMP $ramen_stored = null;
 
-    #[ORM\Column]
-    private ?int $workers = null;
+    #[ORM\Column(type: Types::OBJECT, nullable: true)]
+    private ?\GMP $workers = null;
 
     #[ORM\Column(length: 10)]
     private ?string $public_id = null;
 
-    #[ORM\Column]
-    private ?int $money_cached = null;
+    #[ORM\Column(type: Types::OBJECT, nullable: true)]
+    private ?\GMP $money_cached = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $last_update = null;
@@ -59,10 +71,11 @@ class Restaurant implements \JsonSerializable
 
         $this->capacity = 1;
         $this->quality = 1;
-        $this->ramen_stored = 0;
-        $this->money_cached = 0;
-        $this->workers = 0;
+        $this->ramen_stored = gmp_init(0);
+        $this->money_cached = gmp_init(0);
+        $this->workers = gmp_init(0);
         $this->last_update = new \DateTime();
+        $this->stars = 0;
     }
 
     public function jsonSerialize(): mixed 
@@ -70,14 +83,15 @@ class Restaurant implements \JsonSerializable
         return [
             'owner' => $this->owner->getDiscordId(),
             'public_id' => $this->public_id,
+            'stars' => $this->getStars(),
             'capacity' => $this->capacity,
             'quality' => $this->quality,
-            'ramen_stored' => $this->ramen_stored,
-            'max_storage' => $this->getStorage(),
-            'workers' => $this->workers,
-            'money_cached' => $this->getMoneyCached(),
-            'capacity_upgrade_price' => $this->getUpgradeCapacityPrice(),
-            'quality_upgrade_price' => $this->getUpgradeQualityPrice()
+            'ramen_stored' => Utils::gmpToString($this->ramen_stored),
+            'max_storage' => Utils::gmpToString($this->getStorage()),
+            'workers' => Utils::gmpToString($this->workers),
+            'money_cached' => Utils::gmpToString($this->getMoneyCached()),
+            'capacity_upgrade_price' => Utils::gmpToString($this->getUpgradeCapacityPrice()),
+            'quality_upgrade_price' => Utils::gmpToString($this->getUpgradeQualityPrice())
         ];
     }
 
@@ -94,6 +108,30 @@ class Restaurant implements \JsonSerializable
     public function setOwner(?user $owner): self
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getStars(): ?int
+    {
+        return $this->stars;
+    }
+
+    public function setStars(?int $stars): self
+    {
+        $this->stars = $stars;
+
+        return $this;
+    }
+
+    public function addStar(): self
+    {
+        $this->stars = $this->stars + 1;
+
+        $this->setCapacity(1);
+        $this->setQuality(1);
+        $this->setWorkers(gmp_init(10));
+        $this->setRamenStored($this->getStorage());
 
         return $this;
     }
@@ -117,12 +155,12 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
-    public function getUpgradeCapacityPrice()
+    public function getUpgradeCapacityPrice(): \GMP|string
     {
         if ($this->capacity == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
-        return self::UPGRADE_PRICES[$this->getCapacity() - 1];
+        return gmp_init(self::UPGRADE_PRICES[$this->getCapacity() - 1]) * gmp_init(pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars()));
     }
 
     public function getQuality(): ?int
@@ -146,7 +184,7 @@ class Restaurant implements \JsonSerializable
 
     public function getRamenValue(): int
     {
-        return self::RAMEN_VALUES[$this->quality - 1];
+        return gmp_init(self::RAMEN_VALUES[$this->quality - 1]) * gmp_init(pow(self::STAR_RAMEN_VALUES_COEF, $this->getStars()));
     }
 
     public function getRamenCost(): int
@@ -154,34 +192,34 @@ class Restaurant implements \JsonSerializable
         return self::RAMEN_COST;
     }
 
-    public function getUpgradeQualityPrice()
+    public function getUpgradeQualityPrice(): \GMP|string
     {
         if ($this->quality == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
-        return self::UPGRADE_PRICES[$this->getQuality() - 1];
+        return gmp_init(self::UPGRADE_PRICES[$this->getQuality() - 1]) * gmp_init(pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars()));
     }
 
-    public function getRamenStored(): ?int
+    public function getRamenStored(): ?\GMP
     {
         return $this->ramen_stored;
     }
 
-    public function setRamenStored(int $ramen_stored): self
+    public function setRamenStored(\GMP $ramen_stored): self
     {
         $this->ramen_stored = $ramen_stored;
 
         return $this;
     }
 
-    public function addRamenStored(int $ramen): self
+    public function addRamenStored(\GMP|int|string $ramen): self
     {
         $this->ramen_stored = $this->ramen_stored + $ramen;
 
         return $this;
     }
 
-    public function sellRamen(int $amount): self
+    public function sellRamen(\GMP|int|string $amount): self
     {
         $this->ramen_stored = $this->ramen_stored - $amount;
         $this->addMoneyCached($this->getRamenValue() * $amount);
@@ -189,24 +227,24 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
-    public function getStorage(): int
+    public function getStorage(): \GMP
     {
-        return self::STORAGES[$this->getCapacity() - 1];
+        return gmp_init(self::STORAGES[$this->getCapacity() - 1]);
     }
 
-    public function getWorkers(): ?int
+    public function getWorkers(): ?\GMP
     {
         return $this->workers;
     }
 
-    public function setWorkers(int $workers): self
+    public function setWorkers(\GMP $workers): self
     {
         $this->workers = $workers;
 
         return $this;
     }
 
-    public function addWorkers(int $workers): self
+    public function addWorkers(\GMP|int|string $workers): self
     {
         $this->workers = $this->workers + $workers;
 
@@ -215,7 +253,7 @@ class Restaurant implements \JsonSerializable
 
     public function getWorkersSpeed(): int
     {
-        return self::WORKERS_SPEED;
+        return self::WORKERS_SPEED * pow(self::STAR_WORKERS_SPEED_COEF, $this->getStars());
     }
 
     public function getWorkersCost(): int
@@ -235,19 +273,19 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
-    public function getMoneyCached(): ?int
+    public function getMoneyCached(): ?\GMP
     {
         return $this->money_cached;
     }
 
-    public function setMoneyCached(int $money_cached): self
+    public function setMoneyCached(\GMP $money_cached): self
     {
         $this->money_cached = $money_cached;
 
         return $this;
     }
 
-    public function addMoneyCached(int $money): self
+    public function addMoneyCached(\GMP|int|string $money): self
     {
         $this->money_cached = $this->money_cached + $money;
 
@@ -284,7 +322,12 @@ class Restaurant implements \JsonSerializable
         $this->setLastUpdate($last_update);
 
         // Finally, let's compute how much ramen has been made and update accordingly
-        $ramen_made = min($this->getRamenStored(), $this->getWorkers() * $steps);
+        if ($this->getRamenStored() > $this->getWorkers() * $steps) {
+            $ramen_made = $this->getWorkers() * $steps;
+        }
+        else {
+            $ramen_made = $this->getRamenStored();
+        }
         $this->sellRamen($ramen_made);
 
         return $this;
@@ -300,11 +343,11 @@ class Restaurant implements \JsonSerializable
         return $given_money;
     }
 
-    public function computeScore(): int
+    public function computeScore(): \GMP
     {
         $capacityScore = ($this->getCapacity() * ($this->getCapacity() + 1)) / 2;
         $qualityScore = ($this->getQuality() * ($this->getQuality() + 1)) / 2;
-        $workersScore = intdiv($this->getWorkers(), 50);
+        $workersScore = gmp_div_q($this->getWorkers(), 50);
 
         return $capacityScore + $qualityScore + $workersScore;
     }

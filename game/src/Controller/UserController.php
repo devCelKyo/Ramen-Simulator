@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Utils\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -24,8 +25,8 @@ class UserController extends AbstractController
 
         $user = new User();
         $user->setDiscordId($discord_id);
-        $user->setMoney(50);
-        $user->setRebirth(0);
+        $user->setMoney(gmp_init(50));
+        $user->setRestaurantSlots(1);
 
         $em->persist($user);
         $em->flush();
@@ -71,7 +72,7 @@ class UserController extends AbstractController
 
         // Check time difference to see if claim is available
         $CLAIM_DELAY = 12; // hours
-        $CLAIM_MONEY = 50; // in-game currency
+        $CLAIM_MONEY = gmp_init(50); // in-game currency
 
         $last_claim = $user->getLastDailyClaim();
         $now = new \DateTime("now");
@@ -90,7 +91,7 @@ class UserController extends AbstractController
             $em->persist($user);
 
             $json = $this->json([
-                'money_given' => $CLAIM_MONEY,
+                'money_given' => Utils::gmpToString($CLAIM_MONEY),
                 'error' => 'False'
             ]);
         }
@@ -106,55 +107,13 @@ class UserController extends AbstractController
 
         return $json;
     }
-
-    #[Route('/rebirth/{discord_id}', name: 'rebirth')]
-    public function rebirth(ManagerRegistry $doctrine, string $discord_id): JsonResponse
-    {
-        $em = $doctrine->getManager();
-        $user = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
-        if ($user == null) {
-            return $this->json([
-                'error' => 'True',
-                'message' => 'This user does not exist.'
-            ]);
-        }
-
-        // Check the balance and see whether it's possible to rebirth or not
-        if ($user->getMoney() < $user->getRebirthPrice()) {
-            return $this->json([
-                'error' => 'True',
-                'message' => 'Insufficient funds!'
-            ]);
-        }
-
-        // All verifications done, can now rebirth.
-        // (1) Reset the money
-        $user->setMoney(20);
-
-        // (2) Reset the restaurants
-        $restaurants = $user->getRestaurants();
-        foreach ($restaurants as $restaurant) {
-            $em->remove($restaurant);
-        }
-
-        // (3) Increment rebirth count
-        $user->addRebirth();
-
-        $em->persist($user);
-        $em->flush();
-
-        return $this->json([
-            'error' => 'False',
-            'new_multiplier' => $user->getRebirthMultiplier()
-        ]);
-    }
-
+/* Needs a re-write
     #[Route('/leaderboard', name: 'leaderboard')]
     public function leaderboard(ManagerRegistry $doctrine): JsonResponse
     {
         $em = $doctrine->getManager();
         $query = $em->createQuery(
-            'SELECT u FROM App\Entity\User u ORDER BY u.rebirth DESC, u.money DESC'
+            'SELECT u FROM App\Entity\User u ORDER BY u.money DESC'
         );
         $query->setMaxResults(1000);
         $users = $query->getResult();
@@ -177,5 +136,5 @@ class UserController extends AbstractController
             'error' => 'False',
             'users' => $jsonUsers
         ]);
-    }
+    } */
 }

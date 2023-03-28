@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\Restaurant;
+use App\Utils\Utils;
 use Doctrine\Persistence\ManagerRegistry;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -78,15 +79,14 @@ class RestaurantController extends AbstractController
         }
 
         // First, let's check whether the user is allowed to get another restaurant
-        // (1) : Retrieve the number of restaurant the user owns and figure whether they have enough rebirths
+        // (1) : Retrieve the number of restaurant and check whether the user has enough slots
         $count = $user->getRestaurants()->count();
-        if ($user->getRebirth() + 1 <= $count) {
+        if ($count >= $user->getRestaurantSlots()) {
             return $this->json([
                 'error' => 'True',
-                'message' => 'Can\'t purchase another restaurant, no enough rebirths.'
+                'message' => 'Can\t purchase another restaurant, not enough slots! Buy another.'
             ]);
         }
-
         // (2) : Check the user balance IF AND ONLY IF the user has already at least 1 restaurant : the first one is free
         if ($count >= 1 && $user->getMoney() < Restaurant::PRICE) {
             return $this->json([
@@ -97,9 +97,9 @@ class RestaurantController extends AbstractController
 
         // Arrived there, it should be okay for verifications (!), so let's construct a restaurant, add it to the user object and return a nice JSON
         $restaurant = new Restaurant();
-        $restaurant->setWorkers(10); // SHOULD BE REMOVED AS SOON AS WORKERS CAN BE BOUGHT!!!!
+        $restaurant->addWorkers(10); // SHOULD BE REMOVED AS SOON AS WORKERS CAN BE BOUGHT!!!!
         $user->addRestaurant($restaurant);
-        
+    
         // Let's not forget to actually withdraw the money (only if it's not the first restaurant)
         if ($count >= 1) {
             $user->withdrawMoney(Restaurant::PRICE);
@@ -113,6 +113,119 @@ class RestaurantController extends AbstractController
         return $this->json([
             'error' => 'False',
             'restaurant_shard' => $restaurant->getPublicId()
+        ]);
+    }
+
+    #[Route('/add_star/{restaurant_public_id}', name: 'add_star')]
+    public function add_star(ManagerRegistry $doctrine, Request $request, string $restaurant_public_id): JsonResponse
+    {
+        /**
+         * This API route should be used with a POST request containing the following keys :
+         * - discord_id : string
+         * - n : int
+         * - restaurant_public_id1 : string
+         * - restaurant_public_id2 : string
+         * ...
+         * - restaurant_public_idn : string 
+         */
+        
+        // Parsing request data
+        $discord_id = $request->request->get('discord_id');
+        $n = $request->request->get('n');
+        
+        $restaurant_public_ids = array();
+        for ($i = 1; $i <= $n; $i++) {
+            $restaurant_public_ids[] = $request->request->get('restaurant_public_id'. $i);
+        }
+
+        // Retrieving user and restaurants and checking if they exist, if user can access them, etc.
+        $user = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
+        if ($user == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'This user does not exist'
+            ]);
+        }
+
+        $upgradeRestaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $restaurant_public_id]);
+        if ($upgradeRestaurant == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You can\'t upgrade this restaurant, it doesn\'t even exist.'
+            ]);
+        }
+        else {
+            if ($upgradeRestaurant->getOwner() != $user) {
+                return $this->json([
+                    'error' => 'True',
+                    'message' => 'You don\'t own this shop : '. $upgradeRestaurant->getPublicId()
+                ]);
+            }
+        }
+
+        $restaurants = array();
+        foreach ($restaurant_public_ids as $current_restaurant_public_id) {
+            $restaurant = $doctrine->getRepository(Restaurant::class)->findOneBy(['public_id' => $current_restaurant_public_id]);
+            if ($restaurant == null) {
+                return $this->json([
+                    'error' => 'True',
+                    'message' => 'The restaurant '. $current_restaurant_public_id . ' does not exist'
+                ]);
+            }
+            $restaurants[] = $restaurant;
+        }
+
+        foreach ($restaurants as $restaurant) {
+            if ($restaurant->getOwner() != $user) {
+                return $this->json([
+                    'error' => 'True',
+                    'message' => 'You don\'t own this shop : '. $restaurant->getPublicId()
+                ]);
+            }
+        }
+
+        ////////
+        // Actual gameplay checks... Finally!
+        ////////
+
+        $stars = $upgradeRestaurant->getStars();
+
+        if ($n <= $stars) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You need to fuse more shops to add a star. : '. $stars + 1 .' shops needed'
+            ]);
+        }
+
+        foreach ($restaurants as $restaurant) {
+            if ($restaurant->getStars() < $stars) {
+                return $this->json([
+                    'error' => 'True',
+                    'message' => 'Operation failed! All the restaurants need to have at least '. $stars .' stars.'
+                ]);
+            }
+        }
+
+        if ($upgradeRestaurant->getCapacity() != 10 || $upgradeRestaurant->getQuality() != 10) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'The restaurant to upgrade needs to have its capacity and quality levels maxxed.'
+            ]);
+        }
+
+        // Now, ALL verifications are done. We may now destroy the restaurants and upgrade
+        $em = $doctrine->getManager();
+        foreach ($restaurants as $restaurant) {
+            $em->remove($restaurant);
+        }
+        $upgradeRestaurant->addStar();
+        $em->persist($upgradeRestaurant);
+        $em->persist($user);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'stars' => $upgradeRestaurant->getStars(),
         ]);
     }
 
@@ -182,7 +295,7 @@ class RestaurantController extends AbstractController
 
         return $this->json([
             'error' => 'False',
-            'given_money' => $given_money
+            'given_money' => Utils::gmpToString($given_money)
         ]);
     }
 
@@ -200,9 +313,9 @@ class RestaurantController extends AbstractController
 
         $restaurants = $owner->getRestaurants();
         
-        $given_money = 0;
+        $given_money = gmp_init(0);
         foreach ($restaurants as $restaurant) {
-            $given_money += $restaurant->claim();
+            $given_money = $given_money + $restaurant->claim();
             $em->persist($restaurant);
         }
 
@@ -211,7 +324,7 @@ class RestaurantController extends AbstractController
 
         return $this->json([
             'error' => 'False',
-            'given_money' => $given_money
+            'given_money' => Utils::gmpToString($given_money)
         ]);
     }
 
@@ -235,7 +348,7 @@ class RestaurantController extends AbstractController
             $added_ramen = $max_ramen_to_add;
         }
         else {
-            $added_ramen = intdiv($owner->getMoney(), $ramen_cost);
+            $added_ramen = gmp_div_q($owner->getMoney(), $ramen_cost);
         }
         $restaurant->addRamenStored($added_ramen);
 
@@ -243,10 +356,12 @@ class RestaurantController extends AbstractController
         $em->persist($restaurant);
         $em->flush();
 
+        $cost = gmp_mul($added_ramen, $ramen_cost);
+
         return $this->json([
             'error' => 'False',
-            'added_ramen' => $added_ramen,
-            'cost' => $added_ramen * $ramen_cost
+            'added_ramen' => Utils::gmpToString($added_ramen),
+            'cost' => Utils::gmpToString($cost)
         ]);
     }
 
@@ -262,24 +377,24 @@ class RestaurantController extends AbstractController
             ]);
         }
         $restaurants = $owner->getRestaurants();
-        $total_cost = 0;
-        $total_ramen_added = 0;
+        $total_cost = gmp_init(0);
+        $total_ramen_added = gmp_init(0);
         $ramen_cost = Restaurant::RAMEN_COST;
 
         foreach ($restaurants as $restaurant) {
-            $max_ramen_to_add = $restaurant->getStorage() - $restaurant->getRamenStored();
+            $max_ramen_to_add =$restaurant->getStorage() - $restaurant->getRamenStored();
             if ($ramen_cost * $max_ramen_to_add <= $owner->getMoney()) {
                 $added_ramen = $max_ramen_to_add;
             }
             else {
-                $added_ramen = intval(fdiv($owner->getMoney(), $ramen_cost));
+                $added_ramen = gmp_div_q($owner->getMoney(), $ramen_cost);
             }
             $cost = $added_ramen * $ramen_cost;
             $restaurant->addRamenStored($added_ramen);
             $owner->withdrawMoney($cost);
 
-            $total_ramen_added += $added_ramen;
-            $total_cost += $cost;
+            $total_ramen_added = $total_ramen_added + $added_ramen;
+            $total_cost = $total_cost + $cost;
 
             $em->persist($restaurant);
         }
@@ -289,8 +404,8 @@ class RestaurantController extends AbstractController
 
         return $this->json([
             'error' => 'False',
-            'total_added_ramen' => $total_ramen_added,
-            'total_cost' => $total_cost
+            'total_added_ramen' => Utils::gmpToString($total_ramen_added),
+            'total_cost' => Utils::gmpToString($total_cost)
         ]);
     }
 
@@ -340,8 +455,8 @@ class RestaurantController extends AbstractController
 
         return $this->json([
             'error' => 'False',
-            'added_workers' => $workers_to_add,
-            'total_cost' => $total_cost
+            'added_workers' => Utils::gmpToString($workers_to_add),
+            'total_cost' => Utils::gmpToString($total_cost)
         ]);
     }
 
@@ -388,9 +503,19 @@ class RestaurantController extends AbstractController
 
         return $this->json([
             'error' => 'False',
-            'upgrade_cost' => $upgrade_cost,
-            'upgrade_type' => $upgrade_type
+            'upgrade_cost' => Utils::gmpToString($upgrade_cost),
+            'upgrade_type' => Utils::gmpToString($upgrade_type)
         ]);
     }
 
+    #[Route('/test', name:'test')]
+    public function test(): JsonResponse
+    {
+        return $this->json([
+            '1000' => Utils::gmpToString(gmp_init('1000')),
+            '120 000' => Utils::gmpToString(gmp_init('120 000')), 
+            '1 000 000' => Utils::gmpToString(gmp_init('1 000 000')),
+            '530 100 000 000' => Utils::gmpToString(gmp_init('530 100 000 000'))
+        ]);
+    }
 }

@@ -65,9 +65,8 @@ class Bases(commands.Cog):
 
             embed.add_field(name="Mention", value=ctx.author.mention)
             embed.add_field(name="Money", value=f"{money} 両")
-            embed.add_field(name="Rebirths", value=f"{user_response['user']['rebirths']}")
 
-            await ctx.reply(embed=embed, view=HomeView(ctx.author))
+            await ctx.reply(embed=embed)
 
     @commands.command(aliases=["dc"])
     async def daily_claim(self, ctx):

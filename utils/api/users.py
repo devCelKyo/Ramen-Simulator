@@ -18,18 +18,6 @@ def claim_daily_user(discord_id):
     response = requests.post("http://localhost:8000/users/claim_daily", data=params).json()
     return response
 
-def rebirth(discord_id):
-    response = requests.get(f"http://localhost:8000/users/rebirth/{discord_id}").json()
-    if response["error"] == "True":
-        title = "You can't do that"
-        description = response["message"]
-        colour = discord.Colour.brand_red()
-    else:
-        title = "Rebirth done!!"
-        description = f"Your money multiplier is now x{response['new_multiplier']}"
-        colour = discord.Colour.brand_green()
-    return title, description, colour
-
 def leaderboard():
     response = requests.get("http://localhost:8000/users/leaderboard").json()
     if response["error"] != "False":

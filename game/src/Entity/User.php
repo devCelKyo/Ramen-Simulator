@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Utils\Utils;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -11,8 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements \JsonSerializable
 {
-    const REBIRTH_PRICES = array(30000, 300000, 3000000, 30000000);
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -21,8 +21,8 @@ class User implements \JsonSerializable
     #[ORM\Column(length: 255)]
     private ?string $discord_id = null;
 
-    #[ORM\Column]
-    private ?int $money = null;
+    #[ORM\Column(type: Types::OBJECT, nullable: true)]
+    private ?\GMP $money = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $last_daily_claim = null;
@@ -30,8 +30,8 @@ class User implements \JsonSerializable
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Restaurant::class, orphanRemoval: true)]
     private Collection $restaurants;
 
-    #[ORM\Column]
-    private ?int $rebirth = null;
+    #[ORM\Column(nullable: true)]
+    private ?int $restaurant_slots = null;
 
     public function __construct()
     {
@@ -42,8 +42,7 @@ class User implements \JsonSerializable
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'money' => $this->getMoney(),
-            'rebirths' => $this->getRebirth(),
+            'money' => Utils::gmpToString($this->getMoney()),
             'restaurant_score' => $this->computeRestaurantScore()
         ];
     }
@@ -64,28 +63,27 @@ class User implements \JsonSerializable
 
         return $this;
     }
-
-    public function getMoney(): ?int
+    
+    public function getMoney(): ?\GMP
     {
         return $this->money;
     }
 
-    public function setMoney(int $money): self
+    public function setMoney(\GMP $money): self
     {
         $this->money = $money;
 
         return $this;
     }
 
-    public function addMoney(int $money): int // NEVER EVER USE addMoney WITH NEGATIVE VALUES TO WITHDRAW MONEY, IT USES THE REBIRTH MULTIPLIER !!!!!
+    public function addMoney(\GMP|int|string $money): \GMP
     {
-        $given_money = $this->getRebirthMultiplier()*$money;
-        $this->money = $this->money + $given_money;
+        $this->money = $this->money + $money;
 
-        return $given_money;
+        return $money;
     }
 
-    public function withdrawMoney(int $money): self // USE THIS INSTEAD TO WITHDRAW MONEY, READ THE NAME
+    public function withdrawMoney(\GMP|int|string $money): self
     {
         $this->money = $this->money - $money;
 
@@ -134,41 +132,7 @@ class User implements \JsonSerializable
         return $this;
     }
 
-    public function getRebirth(): ?int
-    {
-        return $this->rebirth;
-    }
-
-    public function setRebirth(int $rebirth): self
-    {
-        $this->rebirth = $rebirth;
-
-        return $this;
-    }
-
-    public function addRebirth(): self
-    {
-        $this->rebirth = $this->rebirth + 1;
-
-        return $this;
-    }
-
-    public function getRebirthMultiplier(): int
-    {
-        if ($this->rebirth == null || $this->rebirth == 0) {
-            return 1;
-        }
-        else {
-            return pow(2, $this->rebirth);
-        }
-    }
-
-    public function getRebirthPrice(): int
-    {
-        return self::REBIRTH_PRICES[$this->getRebirth()];
-    }
-
-    public function computeRestaurantScore(): int
+    public function computeRestaurantScore(): \GMP
     {
         $score = 0;
         $restaurants = $this->getRestaurants();
@@ -177,5 +141,17 @@ class User implements \JsonSerializable
         }
 
         return $score;
+    }
+
+    public function getRestaurantSlots(): ?int
+    {
+        return $this->restaurant_slots;
+    }
+
+    public function setRestaurantSlots(?int $restaurant_slots): self
+    {
+        $this->restaurant_slots = $restaurant_slots;
+
+        return $this;
     }
 }

@@ -13,6 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements \JsonSerializable
 {
+    const RESTAURANT_SLOT_PRICE = "30000";
+    const STAR_RESTAURANT_SLOT_COEF = 100;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -36,6 +39,7 @@ class User implements \JsonSerializable
     public function __construct()
     {
         $this->restaurants = new ArrayCollection();
+        $this->restaurant_slots = 1;
     }
 
     public function jsonSerialize(): mixed 
@@ -43,7 +47,10 @@ class User implements \JsonSerializable
         return [
             'discord_id' => $this->getDiscordId(),
             'money' => Utils::gmpToString($this->getMoney()),
-            'restaurant_score' => $this->computeRestaurantScore()
+            'restaurant_score' => $this->computeRestaurantScore(),
+            'nb_restaurants' => $this->getRestaurants()->count(),
+            'restaurant_slots' => $this->getRestaurantSlots(),
+            'slot_price' => Utils::gmpToString($this->getRestaurantSlotsPrice())
         ];
     }
 
@@ -153,5 +160,17 @@ class User implements \JsonSerializable
         $this->restaurant_slots = $restaurant_slots;
 
         return $this;
+    }
+
+    public function addRestaurantSlot(): self
+    {
+        $this->restaurant_slots = $this->restaurant_slots + 1;
+
+        return $this;
+    }
+
+    public function getRestaurantSlotsPrice(): \GMP
+    {
+        return gmp_init(self::RESTAURANT_SLOT_PRICE) * pow(self::STAR_RESTAURANT_SLOT_COEF, $this->getRestaurantSlots() - 1);
     }
 }

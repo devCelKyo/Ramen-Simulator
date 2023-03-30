@@ -31,7 +31,7 @@ def upgrade(restaurant_public_id, upgrade_type):
         colour = discord.Colour.brand_red()
     else:
         title = "Upgrade successful!"
-        description = f"You succesfully upgraded the {response['upgrade_type']} of the restaurant #```{restaurant_public_id}```"
+        description = f"You succesfully upgraded the {response['upgrade_type']} of the restaurant #`{restaurant_public_id}`"
         colour = discord.Colour.brand_green()
     
     return title, description, colour
@@ -92,6 +92,43 @@ def add_workers(discord_id, restaurant_public_id, workers_amount):
         title = "Workers hired!"
         description = f"You spent {response['total_cost']}両 and hired {response['added_workers']} new workers!"
         colour = discord.Colour.brand_green()
+        img_url = None
+    
+    return title, description, colour, img_url
+
+def buy_slot(discord_id):
+    response = requests.get(f"http://localhost:8000/restaurants/buy_slot/{discord_id}").json()
+
+    if response["error"] == "True":
+        title = "Error !"
+        description = response["message"]
+        colour = discord.Colour.brand_red()
+        img_url = None
+    else:
+        title = "Slot bought!"
+        description = f"You spent {response['cost']}両 and bougth another slot to build a restaurant on! You now have {response['slots']} slots."
+        colour = discord.Colour.brand_green()
+        img_url = None
+    
+    return title, description, colour, img_url
+
+def add_star(discord_id, upgradeRestaurant, fodderRestaurants: list):
+    params = {"discord_id": discord_id, "n": len(fodderRestaurants)}
+    for i in range(1, len(fodderRestaurants) + 1):
+        params[f"restaurant_public_id{i}"] = fodderRestaurants[i - 1]
+    
+    response = requests.get(f"http://localhost:8000/restaurants/add_star/{upgradeRestaurant}",
+                            data=params).json()
+    
+    if response["error"] == "True":
+        title = "Error !"
+        description = response["message"]
+        colour = discord.Colour.brand_red()
+        img_url = None
+    else:
+        title = "Star upgrade succesful!"
+        description = "-- to be written --"
+        colour = discord.Colour.gold()
         img_url = None
     
     return title, description, colour, img_url

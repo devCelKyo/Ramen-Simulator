@@ -88,10 +88,10 @@ class RestaurantController extends AbstractController
             ]);
         }
         // (2) : Check the user balance IF AND ONLY IF the user has already at least 1 restaurant : the first one is free
-        if ($count >= 1 && $user->getMoney() < Restaurant::PRICE) {
+        if ($count >= 1 && $user->getMoney() < Restaurant::getPrice()) {
             return $this->json([
                 'error' => 'True',
-                'message' => 'Can\'t purchase another restaurant, not enough funds.'
+                'message' => 'Can\'t purchase another restaurant, not enough funds. ('. Utils::gmpToString(Restaurant::getPrice()) .')'
             ]);
         }
 
@@ -190,10 +190,10 @@ class RestaurantController extends AbstractController
 
         $stars = $upgradeRestaurant->getStars();
 
-        if ($n <= $stars) {
+        if ($n != $stars) {
             return $this->json([
                 'error' => 'True',
-                'message' => 'You need to fuse more shops to add a star. : '. $stars + 1 .' shops needed'
+                'message' => 'Invalid amount of shops : '. $stars + 1 .' shops needed'
             ]);
         }
 
@@ -516,6 +516,29 @@ class RestaurantController extends AbstractController
             '120 000' => Utils::gmpToString(gmp_init('120 000')), 
             '1 000 000' => Utils::gmpToString(gmp_init('1 000 000')),
             '530 100 000 000' => Utils::gmpToString(gmp_init('530 100 000 000'))
+        ]);
+    }
+
+    #[Route('/buy_slot/{discord_id}', name: 'buy_slot')]
+    public function buy_slot(ManagerRegistry $doctrine, Request $request, string $discord_id): JsonResponse
+    {
+        $owner = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
+
+        if ($owner->getMoney() < $owner->getRestaurantSlotsPrice()) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'Insufficient funds'
+            ]);
+        }
+
+        $owner->addRestaurantSlot();
+        $cost = $owner->getRestaurantSlotsPrice();
+        $owner->withdrawMoney($cost);
+
+        return $this->json([
+            'error' => 'False',
+            'slots' => $owner->getRestaurantSlots(),
+            'cost' => $cost
         ]);
     }
 }

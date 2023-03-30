@@ -2,9 +2,8 @@ import discord
 import discord.ext.commands as commands
 
 import assets.restaurants
-
 import utils.api.restaurants
-from utils.embed import send_embed
+
 from utils.views.shops import ShopsView, SeeShopView
 
 class Shops(commands.Cog):
@@ -40,7 +39,7 @@ class Shops(commands.Cog):
         
         embed.set_footer(text="Type rss [id] to get more details and access specific actions")
 
-        await ctx.reply(embed=embed, view=ShopsView(ctx.author))
+        await ctx.reply(embed=embed, view=ShopsView(self.bot, ctx))
     
     @commands.command(aliases=["ss"])
     async def see_shop(self, ctx, public_id):
@@ -96,6 +95,18 @@ class Shops(commands.Cog):
         embed = discord.Embed(title=title, description=description, colour=colour)
         embed.set_image(url=img_url)
         
+        await ctx.reply(embed=embed)
+    
+    @commands.command(aliases=["fs"])
+    async def refill_shops(self, ctx):
+        '''
+        Refill shops if any
+        '''
+        discord_id = ctx.author.id
+        title, description, colour, img_url = utils.api.restaurants.refill_all(discord_id)
+        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_image(url=img_url)
+
         await ctx.reply(embed=embed)
     
     @commands.command(aliases=["aw"])

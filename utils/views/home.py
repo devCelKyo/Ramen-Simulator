@@ -1,22 +1,29 @@
 import discord
 
-import utils.api.users
+import utils.api.restaurants
 
 class HomeView(discord.ui.View):
-    def __init__(self, author):
+    def __init__(self, bot, ctx):
         super().__init__()
-        self.author = author
+        self.bot = bot
+        self.ctx = ctx
+        self.author = ctx.author
     
-    @discord.ui.button(label="Rebirth", style=discord.ButtonStyle.success)
-    async def rebirth_callback(self, interaction, button):
+    @discord.ui.button(label="Buy slot", style=discord.ButtonStyle.danger)
+    async def buy_slot_callback(self, interaction, button):
         button.disabled = True
         button.label = "---"
         await interaction.response.edit_message(view=self)
 
-        title, description, colour = utils.api.users.rebirth(self.author.id)
-        embed = discord.Embed(title=title, description=description, colour=colour)
-
-        await interaction.followup.send(embed=embed)
-
-    async def interaction_check(self, interaction):
+        title, description, colour, img_url = utils.api.restaurants.buy_slot(self.author.id)
+        await self.ctx.reply(embed=discord.Embed(title=title, description=description, colour=colour, url=img_url))
+    
+    @discord.ui.button(label="Buy restaurant", style=discord.ButtonStyle.success)
+    async def buy_shop_callback(self, interaction, button):
+        button.disabled = True
+        button.label = "---"
+        await interaction.response.edit_message(view=self)
+        await self.ctx.invoke(self.bot.get_command('buy_shop'))
+    
+    async def interaction_check(self, interaction: discord.Interaction):
         return interaction.user.id == self.author.id

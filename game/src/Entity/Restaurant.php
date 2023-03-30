@@ -27,6 +27,11 @@ class Restaurant implements \JsonSerializable
     const STAR_STORAGE_COEF = 10;
     const STAR_RAMEN_VALUES_COEF = 10;
 
+    public static function getPrice(): \GMP
+    {
+        return gmp_init(self::PRICE);
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -184,7 +189,7 @@ class Restaurant implements \JsonSerializable
 
     public function getRamenValue(): int
     {
-        return gmp_init(self::RAMEN_VALUES[$this->quality - 1]) * gmp_init(pow(self::STAR_RAMEN_VALUES_COEF, $this->getStars()));
+        return self::RAMEN_VALUES[$this->quality - 1] * pow(self::STAR_RAMEN_VALUES_COEF, $this->getStars());
     }
 
     public function getRamenCost(): int
@@ -333,12 +338,12 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
-    public function claim(): int // I am pretty sure you need to persist the owner in the database after calling claim... But who knows? Certainly not me!
+    public function claim(): \GMP // I am pretty sure you need to persist the owner in the database after calling claim... But who knows? Certainly not me!
     {
         $this->update();
         $owner = $this->getOwner();
         $given_money = $owner->addMoney($this->getMoneyCached());
-        $this->setMoneyCached(0);
+        $this->setMoneyCached(gmp_init(0));
 
         return $given_money;
     }

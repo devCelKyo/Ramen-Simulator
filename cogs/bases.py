@@ -55,18 +55,20 @@ class Bases(commands.Cog):
                               colour=discord.Colour.brand_red())
             await ctx.reply(embed=embed)
         else:
-            money = user_response["user"]["money"]
+            user = user_response['user']
             embed = discord.Embed(
-                title="Profile",
-                colour=discord.Colour.dark_blue()
+                colour=discord.Colour.dark_blue(),
+                description=f"{ctx.author.mention}, here's your profile:"
             )
 
             embed.set_thumbnail(url=assets.restaurants.SHOP)
 
-            embed.add_field(name="Mention", value=ctx.author.mention)
-            embed.add_field(name="Money", value=f"{money} 両")
+            embed.add_field(name="Money", value=f"{user['money']} 両", inline=False)
+            embed.add_field(name="Restaurants", value=f"{user['nb_restaurants']}")
+            embed.add_field(name="Restaurant slots", value=f"{user['restaurant_slots']}")
+            embed.add_field(name="Current slot price", value=f"{user['slot_price']}")
 
-            await ctx.reply(embed=embed)
+            await ctx.reply(embed=embed, view=HomeView(self.bot, ctx))
 
     @commands.command(aliases=["dc"])
     async def daily_claim(self, ctx):

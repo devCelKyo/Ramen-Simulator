@@ -21,6 +21,7 @@ class UserController extends AbstractController
         $discord_id = $request->request->get('discord_id');
         
         // Using the EntityManager to create a user with this discord_id
+        // Nb : Not explaining this in subsequent routes...
         $em = $doctrine->getManager();
 
         $user = new User();

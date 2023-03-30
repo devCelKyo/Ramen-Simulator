@@ -33,4 +33,26 @@ class Utils
 
         return $remainingDigits . "." . $pointValue . $suffix;
     }
+
+    public static function max(\GMP $a, \GMP $b)
+    {
+        if ($a > $b) {
+            return $a;
+        }
+        return $b;
+    }
+
+    public static function pow(int $base, int $exp)
+    {
+        if ($exp == 0) {
+            return 1;
+        }
+
+        $number = gmp_init($base);
+        for ($i = 0; $i < $exp; $i++) {
+            $number = $number * $base;
+        }
+
+        return $number;
+    }
 }

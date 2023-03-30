@@ -35,7 +35,7 @@ class Shops(commands.Cog):
         for restaurant in restaurants:
             text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}\n"
             text += f"Workers : {restaurant['workers']}"
-            embed.add_field(name=f"#```{restaurant['public_id']}``` ({restaurant['capacity']} || {restaurant['quality']})", value=text)
+            embed.add_field(name=f"#`{restaurant['public_id']}` ({restaurant['capacity']} || {restaurant['quality']}) " + "★"*restaurant['stars'], value=text)
         
         embed.set_footer(text="Type rss [id] to get more details and access specific actions")
 
@@ -58,7 +58,7 @@ class Shops(commands.Cog):
             return
         
         restaurant = response["restaurant"]
-        title = f"Restaurant #```{restaurant['public_id']}```"
+        title = f"Restaurant #`{restaurant['public_id']}`"
         description = f"Capacity : {restaurant['capacity']} / 10\n"
         description += f"Quality : {restaurant['quality']} / 10\n"
         description += f"Workers : {restaurant['workers']}\n"

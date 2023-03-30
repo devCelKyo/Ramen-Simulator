@@ -136,7 +136,7 @@ class Restaurant implements \JsonSerializable
         $this->setCapacity(1);
         $this->setQuality(1);
         $this->setWorkers(gmp_init(10));
-        $this->setRamenStored($this->getStorage());
+        $this->setRamenStored(Utils::max($this->getRamenStored(), $this->getStorage()));
 
         return $this;
     }
@@ -165,7 +165,7 @@ class Restaurant implements \JsonSerializable
         if ($this->capacity == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
-        return gmp_init(self::UPGRADE_PRICES[$this->getCapacity() - 1]) * gmp_init(pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars()));
+        return gmp_init(self::UPGRADE_PRICES[$this->getCapacity() - 1]) * Utils::pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars());
     }
 
     public function getQuality(): ?int
@@ -202,7 +202,7 @@ class Restaurant implements \JsonSerializable
         if ($this->quality == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
-        return gmp_init(self::UPGRADE_PRICES[$this->getQuality() - 1]) * gmp_init(pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars()));
+        return gmp_init(self::UPGRADE_PRICES[$this->getQuality() - 1]) * Utils::pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars());
     }
 
     public function getRamenStored(): ?\GMP
@@ -234,7 +234,7 @@ class Restaurant implements \JsonSerializable
 
     public function getStorage(): \GMP
     {
-        return gmp_init(self::STORAGES[$this->getCapacity() - 1]);
+        return gmp_init(self::STORAGES[$this->getCapacity() - 1]) * Utils::pow(self::STAR_STORAGE_COEF, $this->getStars());
     }
 
     public function getWorkers(): ?\GMP

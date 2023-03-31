@@ -97,14 +97,15 @@ class Bases(commands.Cog):
     @commands.command(aliases=["lb"])
     async def leaderboard(self, ctx):
         users = utils.api.users.leaderboard()
-        title = "Here are the 10 best players :"
+        title = "Here are the 10 wealthiest players:"
         embed = discord.Embed(title=title, colour=discord.Colour.blue())
         index = 1
         for user in users:
             user_object = await self.bot.fetch_user(user['discord_id'])
-            text = f"{user_object.mention} : {user['rebirths']} rebirths, {user['restaurant_score']} upgrade score, {user['money']}両"
+            text = f"{user_object.mention} : {user['money']}両"
             embed.add_field(name=f"#{index}", value=text, inline=False)
             index += 1
         embed.set_thumbnail(url=assets.restaurants.HOKAGE)
+        embed.set_footer(text='Can you make it in?')
         
         await ctx.reply(embed=embed)

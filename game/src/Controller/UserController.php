@@ -108,7 +108,7 @@ class UserController extends AbstractController
 
         return $json;
     }
-/* Needs a re-write
+
     #[Route('/leaderboard', name: 'leaderboard')]
     public function leaderboard(ManagerRegistry $doctrine): JsonResponse
     {
@@ -116,17 +116,7 @@ class UserController extends AbstractController
         $query = $em->createQuery(
             'SELECT u FROM App\Entity\User u ORDER BY u.money DESC'
         );
-        $query->setMaxResults(1000);
         $users = $query->getResult();
-        usort($users, function($a, $b) {
-            if ($a->getRebirth() == $b->getRebirth()) {
-                if ($a->computeRestaurantScore() == $b->computeRestaurantScore()) {
-                    return $b->getMoney() - $b->getMoney();
-                }
-                return $b->computeRestaurantScore() - $a->computeRestaurantScore();
-            }
-            return $b->getRebirth() - $a->getRebirth();
-        });
 
         $jsonUsers = [];
         foreach($users as $user) {
@@ -137,5 +127,5 @@ class UserController extends AbstractController
             'error' => 'False',
             'users' => $jsonUsers
         ]);
-    } */
+    }
 }

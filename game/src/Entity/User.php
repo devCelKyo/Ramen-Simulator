@@ -141,7 +141,7 @@ class User implements \JsonSerializable
 
     public function computeRestaurantScore(): \GMP
     {
-        $score = 0;
+        $score = gmp_init(0);
         $restaurants = $this->getRestaurants();
         foreach($restaurants as $restaurant) {
             $score = $score + $restaurant->computeScore();

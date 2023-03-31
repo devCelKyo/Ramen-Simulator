@@ -5,6 +5,7 @@ import assets.restaurants
 import utils.api.restaurants
 
 from utils.views.shops import ShopsView, SeeShopView
+from utils.views.home import HomeView
 
 class Shops(commands.Cog):
     def __init__(self, bot):
@@ -32,14 +33,19 @@ class Shops(commands.Cog):
         embed.set_thumbnail(url=assets.restaurants.RAMEN)
         
         restaurants = response["restaurants"]
-        for restaurant in restaurants:
-            text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}\n"
-            text += f"Workers : {restaurant['workers']}"
-            embed.add_field(name=f"#`{restaurant['public_id']}` ({restaurant['capacity']} || {restaurant['quality']}) " + "★"*restaurant['stars'], value=text)
-        
-        embed.set_footer(text="Type rss [id] to get more details and access specific actions")
+        if len(restaurants) != 0:
+            for restaurant in restaurants:
+                text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}\n"
+                text += f"Workers : {restaurant['workers']}"
+                embed.add_field(name=f"#`{restaurant['public_id']}` ({restaurant['capacity']} || {restaurant['quality']}) " + "★"*restaurant['stars'], value=text)
+            
+            embed.set_footer(text="Type rss [id] to get more details and access specific actions")
+            view = ShopsView(self.bot, ctx)
+        else:
+            embed.description = "Looks like you don't have any restaurant... The first one is free, buy one!"
+            view = HomeView(self.bot, ctx)
 
-        await ctx.reply(embed=embed, view=ShopsView(self.bot, ctx))
+        await ctx.reply(embed=embed, view=view)
     
     @commands.command(aliases=["ss"])
     async def see_shop(self, ctx, public_id):
@@ -73,17 +79,6 @@ class Shops(commands.Cog):
         embed.add_field(name="Upgrade costs", value=upgrade_costs)
 
         await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id'], ctx.author))
-    
-    @commands.command(aliases=["bs"])
-    async def buy_shop(self, ctx):
-        '''
-        Buys a shop if available
-        '''
-        discord_id = ctx.author.id
-        title, description, colour = utils.api.restaurants.buy_restaurant(discord_id)
-        embed = discord.Embed(title=title, description=description, colour=colour)
-        
-        await ctx.reply(embed=embed)
     
     @commands.command(aliases=["sc"])
     async def shops_claim(self, ctx):

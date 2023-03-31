@@ -23,7 +23,11 @@ class HomeView(discord.ui.View):
         button.disabled = True
         button.label = "---"
         await interaction.response.edit_message(view=self)
-        await self.ctx.invoke(self.bot.get_command('buy_shop'))
+        
+        title, description, colour = utils.api.restaurants.buy_restaurant(self.author.id)
+        embed = discord.Embed(title=title, description=description, colour=colour)
+
+        await self.ctx.reply(embed=embed)
     
     async def interaction_check(self, interaction: discord.Interaction):
         return interaction.user.id == self.author.id

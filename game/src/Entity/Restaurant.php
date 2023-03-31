@@ -14,9 +14,9 @@ class Restaurant implements \JsonSerializable
 {
     // GAMEPLAY CONSTANTS FOR BALANCING
 
-    const UPGRADE_PRICES = array("1000", "5000", "10000", "20000", "40000", "80000", "160000", "320000", "640000");
+    const UPGRADE_PRICES = array("1000", "10000", "20000", "40000", "80000", "160000", "320000", "640000", "1280000");
     const PRICE = "30000";
-    const STORAGES = array("100", "500", "1000", "2000", "4000", "8000", "16000", "32000", "64000", "128000");
+    const STORAGES = array("1000", "5000", "10000", "20000", "40000", "80000", "160000", "320000", "640000", "1280000");
     const RAMEN_COST = 1;
     const RAMEN_VALUES = array(4, 6, 8, 10, 12, 14, 16, 18, 20, 22);
     const WORKERS_SPEED = 3; // Minutes per ramen per worker

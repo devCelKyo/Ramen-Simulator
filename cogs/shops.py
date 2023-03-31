@@ -35,8 +35,8 @@ class Shops(commands.Cog):
         restaurants = response["restaurants"]
         if len(restaurants) != 0:
             for restaurant in restaurants:
-                text = f"Ramen Stored : {restaurant['ramen_stored']} bowl(s) /{restaurant['max_storage']}\n"
-                text += f"Workers : {restaurant['workers']}"
+                text = f"Ramen Stored : **{restaurant['ramen_stored']}** :ramen: /**{restaurant['max_storage']}**\n"
+                text += f"Workers : **{restaurant['workers']}** :cook:"
                 embed.add_field(name=f"#`{restaurant['public_id']}` ({restaurant['capacity']} || {restaurant['quality']}) " + "★"*restaurant['stars'], value=text)
             
             embed.set_footer(text="Type rss [id] to get more details and access specific actions")
@@ -65,18 +65,27 @@ class Shops(commands.Cog):
         
         restaurant = response["restaurant"]
         title = f"Restaurant #`{restaurant['public_id']}`"
-        description = f"Capacity : {restaurant['capacity']} / 10\n"
-        description += f"Quality : {restaurant['quality']} / 10\n"
-        description += f"Workers : {restaurant['workers']}\n"
-        description += f"Ramen stored : {restaurant['ramen_stored']} / {restaurant['max_storage']}\n"
-        description += f"Money available : {restaurant['money_cached']}\n"
         colour = discord.Colour.blurple()
+        embed = discord.Embed(title=title, colour=colour)
 
-        embed = discord.Embed(title=title, description=description, colour=colour)
+        if restaurant['stars'] == 0:
+            stars = "None"
+        else:
+            stars = "★"*restaurant['stars']
+        text = f"Stars : {stars}\n"
+        text += f"Capacity : {restaurant['capacity']} / 10\n"
+        text += f"Quality : {restaurant['quality']} / 10\n"
+        text += f"Workers : {restaurant['workers']}\n"
+        embed.add_field(name=":star2: Levels", value=text, inline=False)
+
+        text = f"Ramen stored : {restaurant['ramen_stored']} / {restaurant['max_storage']}\n"
+        text += f"Money available : {restaurant['money_cached']}\n"
+        embed.add_field(name=":office: State", value=text, inline=False)
+        
+        upgrade_costs = f"Capacity : {restaurant['capacity_upgrade_price']}両\n"
+        upgrade_costs += f"Quality : {restaurant['quality_upgrade_price']}両"
+        embed.add_field(name=":moneybag: Upgrade costs", value=upgrade_costs, inline=False)
         embed.set_thumbnail(url=assets.restaurants.RAMEN)
-        upgrade_costs = f"Capacity : {restaurant['capacity_upgrade_price']}\n"
-        upgrade_costs += f"Quality : {restaurant['quality_upgrade_price']}"
-        embed.add_field(name="Upgrade costs", value=upgrade_costs)
 
         await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id'], ctx.author))
     

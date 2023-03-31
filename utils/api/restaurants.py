@@ -31,7 +31,7 @@ def upgrade(restaurant_public_id, upgrade_type):
         colour = discord.Colour.brand_red()
     else:
         title = "Upgrade successful!"
-        description = f"You succesfully upgraded the {response['upgrade_type']} of the restaurant #`{restaurant_public_id}`"
+        description = f"You succesfully upgraded the **{response['upgrade_type']}** of the restaurant #`{restaurant_public_id}`"
         colour = discord.Colour.brand_green()
     
     return title, description, colour
@@ -57,7 +57,7 @@ def claim_shops(discord_id):
             colour = discord.Colour.dark_red()
             img_url = assets.restaurants.NO_MONEY
         else:
-            description = f"You redeemed what your restaurants earned and got {response['given_money']}両!"
+            description = f"You redeemed what your restaurants earned and got **{response['given_money']}**両!"
             colour = discord.Colour.brand_green()
             img_url = assets.restaurants.RYO
     
@@ -72,7 +72,7 @@ def refill_all(discord_id):
         img_url = assets.restaurants.FAIL
     else:
         title = "Restaurants refilled!"
-        description = f"You spent {response['total_cost']}両 and ordered a total of {response['total_added_ramen']} bowl(s) for your restaurant(s)."
+        description = f"You spent **{response['total_cost']}**両 and ordered a total of **{response['total_added_ramen']}** :ramen: for your restaurant(s)."
         colour = discord.Colour.brand_green()
         img_url = assets.restaurants.RAMEN
     
@@ -90,7 +90,7 @@ def add_workers(discord_id, restaurant_public_id, workers_amount):
         img_url = None
     else:
         title = "Workers hired!"
-        description = f"You spent {response['total_cost']}両 and hired {response['added_workers']} new workers!"
+        description = f"You spent **{response['total_cost']}**両 and hired **{response['added_workers']}** new workers!"
         colour = discord.Colour.brand_green()
         img_url = None
     
@@ -106,7 +106,7 @@ def buy_slot(discord_id):
         img_url = None
     else:
         title = "Slot bought!"
-        description = f"You spent {response['cost']}両 and bougth another slot to build a restaurant on! You now have {response['slots']} slots."
+        description = f"You spent **{response['cost']}**両 and bougth another slot to build a restaurant on! You now have **{response['slots']}** slots."
         colour = discord.Colour.brand_green()
         img_url = None
     

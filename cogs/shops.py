@@ -87,7 +87,7 @@ class Shops(commands.Cog):
         embed.add_field(name=":moneybag: Upgrade costs", value=upgrade_costs, inline=False)
         embed.set_thumbnail(url=assets.restaurants.RAMEN)
 
-        await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id'], ctx.author))
+        await ctx.reply(embed=embed, view=SeeShopView(restaurant['public_id'], self.bot, ctx))
     
     @commands.command(aliases=["sc"])
     async def shops_claim(self, ctx):

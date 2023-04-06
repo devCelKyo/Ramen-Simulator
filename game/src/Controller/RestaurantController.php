@@ -433,8 +433,17 @@ class RestaurantController extends AbstractController
                 'message' => 'You are not allowed to manage this restaurant.'
             ]);
         }
+        
+        try {
+            $workers_to_add = Utils::stringToGMP($request->request->get('workers_to_add'));
+        }
+        catch (\Exception $e) {
+            return $this->json([
+                'error' => 'True',
+                'message' => $e->getMessage(),
+            ]);
+        }
 
-        $workers_to_add = $request->request->get('workers_to_add');
         $workers_cost = $restaurant->getWorkersCost();
         $total_cost = $workers_cost * $workers_to_add;
 
@@ -512,10 +521,7 @@ class RestaurantController extends AbstractController
     public function test(): JsonResponse
     {
         return $this->json([
-            '1000' => Utils::gmpToString(gmp_init('1000')),
-            '120 000' => Utils::gmpToString(gmp_init('120 000')), 
-            '1 000 000' => Utils::gmpToString(gmp_init('1 000 000')),
-            '530 100 000 000' => Utils::gmpToString(gmp_init('530 100 000 000'))
+            '122.1B' => Utils::gmpToString(Utils::stringToGMP('122.1B'))
         ]);
     }
 

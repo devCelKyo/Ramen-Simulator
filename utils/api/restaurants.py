@@ -52,7 +52,7 @@ def claim_shops(discord_id):
     else:
         title = "Revenue Redeemed!"
         given_money = response['given_money']
-        if given_money == 0:
+        if given_money == "0":
             description = "There was nothing to claim... Get to work!"
             colour = discord.Colour.dark_red()
             img_url = assets.restaurants.NO_MONEY
@@ -71,10 +71,17 @@ def refill_all(discord_id):
         colour = discord.Colour.brand_red()
         img_url = assets.restaurants.FAIL
     else:
-        title = "Restaurants refilled!"
-        description = f"You spent **{response['total_cost']}**両 and ordered a total of **{response['total_added_ramen']}** :ramen: for your restaurant(s)."
-        colour = discord.Colour.brand_green()
-        img_url = assets.restaurants.RAMEN
+        added_ramen = response['total_added_ramen']
+        if added_ramen == "0":
+            title = "Looks like something went wrong..."
+            description = "Impossible to refill more... no money or no storage left."
+            colour = discord.Colour.blue()
+            img_url = None
+        else:
+            title = "Restaurants refilled!"
+            description = f"You spent **{response['total_cost']}**両 and ordered a total of **{added_ramen}** :ramen: for your restaurant(s)."
+            colour = discord.Colour.brand_green()
+            img_url = assets.restaurants.RAMEN
     
     return title, description, colour, img_url
 

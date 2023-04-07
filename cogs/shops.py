@@ -37,7 +37,7 @@ class Shops(commands.Cog):
             for restaurant in restaurants:
                 text = f"Ramen Stored : **{restaurant['ramen_stored']}** :ramen: /**{restaurant['max_storage']}**\n"
                 text += f"Workers : **{restaurant['workers']}** :cook:"
-                embed.add_field(name=f"#`{restaurant['public_id']}` ({restaurant['capacity']} || {restaurant['quality']}) " + "★"*restaurant['stars'], value=text)
+                embed.add_field(name=f"#`{restaurant['public_id']}` ({restaurant['capacity']} || {restaurant['quality']}) " + "★"*restaurant['stars'], value=text, inline=False)
             
             embed.set_footer(text="Type rss [id] to get more details and access specific actions")
             view = ShopsView(self.bot, ctx)
@@ -81,6 +81,12 @@ class Shops(commands.Cog):
         text = f"Ramen stored : {restaurant['ramen_stored']} / {restaurant['max_storage']}\n"
         text += f"Money available : {restaurant['money_cached']}\n"
         embed.add_field(name=":office: State", value=text, inline=False)
+
+        minutes = int(restaurant['workers_time'])
+        seconds = int((float(restaurant['workers_time']) % 1) * 60)
+        text = f"Working time : {minutes} mn {seconds} s\n"
+        text += f"Ramen value : {restaurant['ramen_value']}両"
+        embed.add_field(name=":bar_chart: Stats", value=text)
         
         upgrade_costs = f"Capacity : {restaurant['capacity_upgrade_price']}両\n"
         upgrade_costs += f"Quality : {restaurant['quality_upgrade_price']}両"
@@ -117,6 +123,15 @@ class Shops(commands.Cog):
     async def add_workers(self, ctx, restaurant_public_id, workers_amount):
         discord_id = ctx.author.id
         title, description, colour, img_url = utils.api.restaurants.add_workers(discord_id, restaurant_public_id, workers_amount)
+        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed.set_image(url=img_url)
+
+        await ctx.reply(embed=embed)
+    
+    @commands.command(aliases=["p"])
+    async def promote(self, ctx, restaurant_public_id, *args):
+        discord_id = ctx.author.id
+        title, description, colour, img_url = utils.api.restaurants.promote(discord_id, restaurant_public_id, args)
         embed = discord.Embed(title=title, description=description, colour=colour)
         embed.set_image(url=img_url)
 

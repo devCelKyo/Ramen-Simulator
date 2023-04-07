@@ -190,7 +190,7 @@ class RestaurantController extends AbstractController
 
         $stars = $upgradeRestaurant->getStars();
 
-        if ($n != $stars) {
+        if ($n != $stars + 1) {
             return $this->json([
                 'error' => 'True',
                 'message' => 'Invalid amount of shops : '. $stars + 1 .' shops needed'
@@ -537,14 +537,18 @@ class RestaurantController extends AbstractController
             ]);
         }
 
-        $owner->addRestaurantSlot();
         $cost = $owner->getRestaurantSlotsPrice();
+        $owner->addRestaurantSlot();
         $owner->withdrawMoney($cost);
+
+        $em = $doctrine->getManager();
+        $em->persist($owner);
+        $em->flush();
 
         return $this->json([
             'error' => 'False',
             'slots' => $owner->getRestaurantSlots(),
-            'cost' => $cost
+            'cost' => Utils::gmpToString($cost)
         ]);
     }
 }

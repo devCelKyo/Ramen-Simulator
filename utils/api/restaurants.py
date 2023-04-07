@@ -112,12 +112,12 @@ def buy_slot(discord_id):
     
     return title, description, colour, img_url
 
-def add_star(discord_id, upgradeRestaurant, fodderRestaurants: list):
+def promote(discord_id, upgradeRestaurant, fodderRestaurants: list):
     params = {"discord_id": discord_id, "n": len(fodderRestaurants)}
     for i in range(1, len(fodderRestaurants) + 1):
         params[f"restaurant_public_id{i}"] = fodderRestaurants[i - 1]
     
-    response = requests.get(f"http://localhost:8000/restaurants/add_star/{upgradeRestaurant}",
+    response = requests.post(f"http://localhost:8000/restaurants/add_star/{upgradeRestaurant}",
                             data=params).json()
     
     if response["error"] == "True":
@@ -127,7 +127,7 @@ def add_star(discord_id, upgradeRestaurant, fodderRestaurants: list):
         img_url = None
     else:
         title = "Star upgrade succesful!"
-        description = "-- to be written --"
+        description = f"Judges from Guide Michelin reviewed your restaurant **#{upgradeRestaurant}** and decided to give it a star!"
         colour = discord.Colour.gold()
         img_url = None
     

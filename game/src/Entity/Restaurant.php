@@ -19,7 +19,7 @@ class Restaurant implements \JsonSerializable
     const STORAGES = array("1000", "5000", "10000", "20000", "40000", "80000", "160000", "320000", "640000", "1280000");
     const RAMEN_COST = 1;
     const RAMEN_VALUES = array(4, 6, 8, 10, 12, 14, 16, 18, 20, 22);
-    const WORKERS_SPEED = 3; // Minutes per ramen per worker
+    const WORKERS_SPEED = 3.0; // Minutes per ramen per worker
     const WORKERS_COST = 100;
     
     const STAR_WORKERS_SPEED_COEF = 0.95;
@@ -95,6 +95,8 @@ class Restaurant implements \JsonSerializable
             'max_storage' => Utils::gmpToString($this->getStorage()),
             'workers' => Utils::gmpToString($this->workers),
             'money_cached' => Utils::gmpToString($this->getMoneyCached()),
+            'ramen_value' => Utils::gmpToString($this->getRamenValue()),
+            'workers_time' => $this->getWorkersSpeed(),
             'capacity_upgrade_price' => Utils::gmpToString($this->getUpgradeCapacityPrice()),
             'quality_upgrade_price' => Utils::gmpToString($this->getUpgradeQualityPrice())
         ];
@@ -256,7 +258,7 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
-    public function getWorkersSpeed(): int
+    public function getWorkersSpeed(): float
     {
         return self::WORKERS_SPEED * pow(self::STAR_WORKERS_SPEED_COEF, $this->getStars());
     }
@@ -315,14 +317,14 @@ class Restaurant implements \JsonSerializable
         $last_update = $this->getLastUpdate();
         $difference = $last_update->diff($now); // This is a DateInterval, not a DateTime
 
-        $delay = $this->getWorkersSpeed() * 60;
+        $delay = intval($this->getWorkersSpeed() * 60);
         // Let's find how many amount of $delay we can fit in $difference (integer division)
         $difference_seconds = date_create('@0')->add($difference)->getTimestamp();
         $steps = intdiv($difference_seconds, $delay);
         
         // We use an integer division, so the new update date isn't necessarily now() but the biggest multiple of $delay before now()
-        $datetime = $steps * $this->getWorkersSpeed();
-        $time_to_add = \DateInterval::createFromDateString($datetime." minutes");
+        $datetime = $steps * $delay;
+        $time_to_add = \DateInterval::createFromDateString($datetime." seconds");
         $last_update->add($time_to_add);
         $this->setLastUpdate($last_update);
 

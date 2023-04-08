@@ -128,4 +128,30 @@ class UserController extends AbstractController
             'users' => $jsonUsers
         ]);
     }
+
+    // Cheated admin route
+    #[Route('/add_money/{discord_id}', name: 'leaderboard')]
+    public function add_money(ManagerRegistry $doctrine, Request $request, string $discord_id): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $user = $doctrine->getRepository(User::class)->findOneBy(['discord_id' => $discord_id]);
+
+        if ($user == null) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'No user has this ID'
+            ]);
+        }
+
+        $money = gmp_init($request->request->get('money'));
+        $user->addMoney($money);
+
+        $em->persist($user);
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'given_money' => Utils::gmpToString($money)
+        ]);
+    }
 }

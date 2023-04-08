@@ -73,7 +73,7 @@ class UserController extends AbstractController
 
         // Check time difference to see if claim is available
         $CLAIM_DELAY = 12; // hours
-        $CLAIM_MONEY = gmp_init(50); // in-game currency
+        $CLAIM_MONEY = gmp_init("5000"); // in-game currency
 
         $last_claim = $user->getLastDailyClaim();
         $now = new \DateTime("now");

@@ -143,7 +143,7 @@ class UserController extends AbstractController
             ]);
         }
 
-        $money = gmp_init($request->request->get('money'));
+        $money = Utils::stringToGMP($request->request->get('money'));
         $user->addMoney($money);
 
         $em->persist($user);

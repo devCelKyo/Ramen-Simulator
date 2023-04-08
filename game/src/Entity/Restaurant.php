@@ -24,8 +24,8 @@ class Restaurant implements \JsonSerializable
     
     const STAR_WORKERS_SPEED_COEF = 0.95;
     const STAR_UPGRADE_PRICES_COEF = 10;
-    const STAR_STORAGE_COEF = 10;
-    const STAR_RAMEN_VALUES_COEF = 10;
+    const STAR_STORAGE_COEF = 30;
+    const STAR_RAMEN_VALUES_COEF = 3;
 
     public static function getPrice(): \GMP
     {

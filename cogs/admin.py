@@ -9,4 +9,5 @@ class Admin(commands.Cog):
     @commands.command()
     @utils.permissions.admin()
     async def broadcast(self, ctx, message):
-        await ctx.send(message)
+        for guild in self.bot.guilds:
+            guild.system_channel.send(content=f"@everyone : System announcement\n {message}")

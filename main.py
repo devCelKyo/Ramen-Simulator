@@ -12,7 +12,7 @@ from cogs.admin import Admin
 intents = discord.Intents.default()
 intents.message_content = True
 
-Bot = discord.ext.commands.Bot(command_prefix='r', intents=intents)
+Bot = discord.ext.commands.Bot(command_prefix='r', intents=intents, allowed_mentions=discord.AllowedMentions(everyone = True))
 async def add_cogs():
     await Bot.add_cog(Bases(Bot))
     await Bot.add_cog(Shops(Bot))

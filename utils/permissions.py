@@ -1,10 +1,11 @@
+import discord.ext.commands as commands
+
+
 ADMINS = ["275260209771970560"]
 
-def admin(func):
-    def inner(ctx, *args, **kwargs):
-        if ctx.author.id not in ADMINS:
-            raise Exception("Not allowed")
-        else:
-            func(*args, **kwargs)
+def admin():
+    def predicate(ctx):
+        allowed = ctx.author.id in ADMINS
+        return allowed
     
-    return inner
+    return commands.check(predicate)

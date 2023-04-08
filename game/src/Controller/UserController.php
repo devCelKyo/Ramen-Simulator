@@ -130,7 +130,7 @@ class UserController extends AbstractController
     }
 
     // Cheated admin route
-    #[Route('/add_money/{discord_id}', name: 'leaderboard')]
+    #[Route('/add_money/{discord_id}', name: 'add_money')]
     public function add_money(ManagerRegistry $doctrine, Request $request, string $discord_id): JsonResponse
     {
         $em = $doctrine->getManager();

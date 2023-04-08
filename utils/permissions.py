@@ -1,7 +1,7 @@
 import discord.ext.commands as commands
 
 
-ADMINS = ["275260209771970560"]
+ADMINS = [275260209771970560]
 
 def admin():
     def predicate(ctx):

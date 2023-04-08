@@ -8,5 +8,5 @@ class Admin(commands.Cog):
     
     @utils.permissions.admin
     @commands.command()
-    async def broadcast(ctx, message):
+    async def broadcast(self, ctx, message):
         await ctx.send(message)

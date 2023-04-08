@@ -7,6 +7,6 @@ class Admin(commands.Cog):
         self.bot = bot
     
     @commands.command()
-    @utils.permissions.admin
+    @utils.permissions.admin()
     async def broadcast(self, ctx, message):
         await ctx.send(message)

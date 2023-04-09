@@ -70,7 +70,7 @@ class Bases(commands.Cog):
 
             await ctx.reply(embed=embed, view=HomeView(self.bot, ctx))
 
-    @commands.command(aliases=["dc"])
+    @commands.command(aliases=["dc", "sa"])
     async def daily_claim(self, ctx):
         '''
         You can claim a reward every 12 hours, don't forget it!

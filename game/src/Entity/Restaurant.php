@@ -136,8 +136,16 @@ class Restaurant implements \JsonSerializable
     {
         $this->stars = $this->stars + 1;
 
+        // Resetting levels
         $this->setCapacity(1);
         $this->setQuality(1);
+
+        // Fixing eventual ramen storage and workers overflow
+        $this->setRamenStored(gmp_init(0));
+
+        $currentWorkers = $this->getWorkers();
+        $maxWorkers = $this->getMaxWorkers();
+        $this->setWorkers(Utils::min($currentWorkers, $maxWorkers));
 
         return $this;
     }

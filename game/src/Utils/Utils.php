@@ -40,7 +40,7 @@ class Utils
     public static function stringToGMP(string $number)
     {
         // Basic regex just to make sure it's not complete nonsense
-        $matches_format = preg_match('#^[0-9]{1,3}\.([0-9])?[A-Za-z]$#', $number);
+        $matches_format = preg_match('#^[0-9]{1,3}(\.[0-9])?[A-Za-z]$#', $number);
         $all_numbers = preg_match('#^[0-9]+$#', $number);
         if (!$matches_format && !$all_numbers) {
             throw new \Exception('Invalid number format... how could you miss this?');
@@ -92,6 +92,14 @@ class Utils
             return $a;
         }
         return $b;
+    }
+
+    public static function min(\GMP $a, \GMP $b)
+    {
+        if ($a > $b) {
+            return $b;
+        }
+        return $a;
     }
 
     public static function pow(int $base, int $exp)

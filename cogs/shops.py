@@ -85,7 +85,8 @@ class Shops(commands.Cog):
         minutes = int(restaurant['workers_time'])
         seconds = int((float(restaurant['workers_time']) % 1) * 60)
         text = f"Working time : {minutes} mn {seconds} s\n"
-        text += f"Ramen value : {restaurant['ramen_value']}両"
+        text += f"Ramen value : {restaurant['ramen_value']}両\n"
+        text += f"Maximum workers capacity : {restaurant['max_workers']}"
         embed.add_field(name=":bar_chart: Stats", value=text)
         
         upgrade_costs = f"Capacity : {restaurant['capacity_upgrade_price']}両\n"

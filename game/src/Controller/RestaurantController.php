@@ -339,29 +339,14 @@ class RestaurantController extends AbstractController
                 'message' => 'No restaurant has this ID'
             ]);
         }
+        $added_ramen = $restaurant->refill();
 
-        $owner = $restaurant->getOwner();
-        
-        $ramen_cost = Restaurant::RAMEN_COST;
-        $max_ramen_to_add = $restaurant->getStorage() - $restaurant->getRamenStored();
-        if ($ramen_cost * $max_ramen_to_add <= $owner->getMoney()) {
-            $added_ramen = $max_ramen_to_add;
-        }
-        else {
-            $added_ramen = gmp_div_q($owner->getMoney(), $ramen_cost);
-        }
-        $restaurant->addRamenStored($added_ramen);
-
-        $em->persist($owner);
         $em->persist($restaurant);
         $em->flush();
 
-        $cost = gmp_mul($added_ramen, $ramen_cost);
-
         return $this->json([
             'error' => 'False',
-            'added_ramen' => Utils::gmpToString($added_ramen),
-            'cost' => Utils::gmpToString($cost)
+            'added_ramen' => Utils::gmpToString($added_ramen)
         ]);
     }
 
@@ -377,35 +362,19 @@ class RestaurantController extends AbstractController
             ]);
         }
         $restaurants = $owner->getRestaurants();
-        $total_cost = gmp_init(0);
         $total_ramen_added = gmp_init(0);
-        $ramen_cost = Restaurant::RAMEN_COST;
 
         foreach ($restaurants as $restaurant) {
-            $max_ramen_to_add =$restaurant->getStorage() - $restaurant->getRamenStored();
-            if ($ramen_cost * $max_ramen_to_add <= $owner->getMoney()) {
-                $added_ramen = $max_ramen_to_add;
-            }
-            else {
-                $added_ramen = gmp_div_q($owner->getMoney(), $ramen_cost);
-            }
-            $cost = $added_ramen * $ramen_cost;
-            $restaurant->addRamenStored($added_ramen);
-            $owner->withdrawMoney($cost);
-
+            $added_ramen = $restaurant->refill();
             $total_ramen_added = $total_ramen_added + $added_ramen;
-            $total_cost = $total_cost + $cost;
-
             $em->persist($restaurant);
         }
 
-        $em->persist($owner);
         $em->flush();
 
         return $this->json([
             'error' => 'False',
-            'total_added_ramen' => Utils::gmpToString($total_ramen_added),
-            'total_cost' => Utils::gmpToString($total_cost)
+            'total_added_ramen' => Utils::gmpToString($total_ramen_added)
         ]);
     }
 
@@ -426,7 +395,7 @@ class RestaurantController extends AbstractController
             ]);
         }
         $request_discord_id = $request->request->get('discord_id');
-        $owner = $restaurant->getOwner(); // should be verified with discord_id key
+        $owner = $restaurant->getOwner();
         if ($request_discord_id != $owner->getDiscordId()) {
             return $this->json([
                 'error' => 'True',
@@ -454,6 +423,10 @@ class RestaurantController extends AbstractController
             ]);
         }
 
+        
+        $workers_to_add = Utils::min($restaurant->getMaxWorkers() - $restaurant->getWorkers(), $workers_to_add);
+        $total_cost = $workers_cost * $workers_to_add;
+        
         // All verifications are done, we can add the workers and withdraw the money
         $restaurant->addWorkers($workers_to_add);
         $owner->withdrawMoney($total_cost);
@@ -549,6 +522,28 @@ class RestaurantController extends AbstractController
             'error' => 'False',
             'slots' => $owner->getRestaurantSlots(),
             'cost' => Utils::gmpToString($cost)
+        ]);
+    }
+
+    // ADMIN ROUTE FOR PATCH 1.5 TO BE DELETED
+    #[Route('/workers_fix', name: 'workers_fix')]
+    public function workers_fix(ManagerRegistry $doctrine): JsonResponse
+    {
+        $em = $doctrine->getManager();
+        $restaurants = $doctrine->getRepository(Restaurant::class)->findAll();
+
+        foreach($restaurants as $restaurant) {
+            if ($restaurant->getWorkers() > $restaurant->getMaxWorkers()) {
+                $restaurant->setWorkers($restaurant->getMaxWorkers());
+            }
+            $em->persist($restaurant);
+        }
+
+        $em->flush();
+
+        return $this->json([
+            'error' => 'False',
+            'message' => 'OK'
         ]);
     }
 }

@@ -14,22 +14,22 @@ class Restaurant implements \JsonSerializable
 {
     // GAMEPLAY CONSTANTS FOR BALANCING
 
-    const UPGRADE_PRICES = array("1000", "10000", "20000", "40000", "80000", "160000", "320000", "640000", "1280000");
-    const PRICE = "30000";
-    const STORAGES = array("1000", "5000", "10000", "20000", "40000", "80000", "160000", "320000", "640000", "1280000");
-    const RAMEN_COST = 1;
+    const UPGRADE_PRICES = array("1000", "10K", "50K", "100K", "500K", "1M", "5M", "10M", "50M");
+    const PRICE = "30K";
+    const STORAGES = array("10K", "50K", "100K", "500K", "1M", "5M", "10M", "50M", "100M", "500M");
     const RAMEN_VALUES = array(4, 6, 8, 10, 12, 14, 16, 18, 20, 22);
     const WORKERS_SPEED = 3.0; // Minutes per ramen per worker
     const WORKERS_COST = 100;
+    const MAX_WORKERS_PERCENTAGE = 0.02;
     
     const STAR_WORKERS_SPEED_COEF = 0.95;
     const STAR_UPGRADE_PRICES_COEF = 10;
-    const STAR_STORAGE_COEF = 30;
+    const STAR_STORAGE_COEF = 100;
     const STAR_RAMEN_VALUES_COEF = 3;
 
     public static function getPrice(): \GMP
     {
-        return gmp_init(self::PRICE);
+        return Utils::stringToGMP(self::PRICE);
     }
 
     #[ORM\Id]
@@ -94,6 +94,7 @@ class Restaurant implements \JsonSerializable
             'ramen_stored' => Utils::gmpToString($this->ramen_stored),
             'max_storage' => Utils::gmpToString($this->getStorage()),
             'workers' => Utils::gmpToString($this->workers),
+            'max_workers' => Utils::gmpToString($this->getMaxWorkers()),
             'money_cached' => Utils::gmpToString($this->getMoneyCached()),
             'ramen_value' => Utils::gmpToString($this->getRamenValue()),
             'workers_time' => $this->getWorkersSpeed(),
@@ -137,8 +138,6 @@ class Restaurant implements \JsonSerializable
 
         $this->setCapacity(1);
         $this->setQuality(1);
-        $this->setWorkers(gmp_init(10));
-        $this->setRamenStored(Utils::max($this->getRamenStored(), $this->getStorage()));
 
         return $this;
     }
@@ -167,7 +166,7 @@ class Restaurant implements \JsonSerializable
         if ($this->capacity == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
-        return gmp_init(self::UPGRADE_PRICES[$this->getCapacity() - 1]) * Utils::pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars());
+        return Utils::stringToGMP(self::UPGRADE_PRICES[$this->getCapacity() - 1]) * Utils::pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars());
     }
 
     public function getQuality(): ?int
@@ -194,17 +193,12 @@ class Restaurant implements \JsonSerializable
         return self::RAMEN_VALUES[$this->quality - 1] * pow(self::STAR_RAMEN_VALUES_COEF, $this->getStars());
     }
 
-    public function getRamenCost(): int
-    {
-        return self::RAMEN_COST;
-    }
-
     public function getUpgradeQualityPrice(): \GMP|string
     {
         if ($this->quality == count(self::UPGRADE_PRICES) + 1) {
             return "MAXXED!";
         }
-        return gmp_init(self::UPGRADE_PRICES[$this->getQuality() - 1]) * Utils::pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars());
+        return Utils::stringToGMP(self::UPGRADE_PRICES[$this->getQuality() - 1]) * Utils::pow(self::STAR_UPGRADE_PRICES_COEF, $this->getStars());
     }
 
     public function getRamenStored(): ?\GMP
@@ -226,6 +220,14 @@ class Restaurant implements \JsonSerializable
         return $this;
     }
 
+    public function refill(): \GMP
+    {
+        $ramen_to_add = $this->getStorage() - $this->getRamenStored();
+        $this->addRamenStored($ramen_to_add);
+
+        return $ramen_to_add;
+    }
+
     public function sellRamen(\GMP|int|string $amount): self
     {
         $this->ramen_stored = $this->ramen_stored - $amount;
@@ -236,7 +238,7 @@ class Restaurant implements \JsonSerializable
 
     public function getStorage(): \GMP
     {
-        return gmp_init(self::STORAGES[$this->getCapacity() - 1]) * Utils::pow(self::STAR_STORAGE_COEF, $this->getStars());
+        return Utils::stringToGMP(self::STORAGES[$this->getCapacity() - 1]) * Utils::pow(self::STAR_STORAGE_COEF, $this->getStars());
     }
 
     public function getWorkers(): ?\GMP
@@ -256,6 +258,11 @@ class Restaurant implements \JsonSerializable
         $this->workers = $this->workers + $workers;
 
         return $this;
+    }
+
+    public function getMaxWorkers(): \GMP
+    {
+        return $this->getStorage() * self::MAX_WORKERS_PERCENTAGE;
     }
 
     public function getWorkersSpeed(): float

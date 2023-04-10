@@ -74,12 +74,12 @@ def refill_all(discord_id):
         added_ramen = response['total_added_ramen']
         if added_ramen == "0":
             title = "Looks like something went wrong..."
-            description = "Impossible to refill more... no money or no storage left."
+            description = "Impossible to refill more... no storage left."
             colour = discord.Colour.blue()
             img_url = None
         else:
             title = "Restaurants refilled!"
-            description = f"You spent **{response['total_cost']}**両 and ordered a total of **{added_ramen}** :ramen: for your restaurant(s)."
+            description = f"You ordered a total of **{added_ramen}** :ramen: for your restaurant(s)."
             colour = discord.Colour.brand_green()
             img_url = assets.restaurants.RAMEN
     

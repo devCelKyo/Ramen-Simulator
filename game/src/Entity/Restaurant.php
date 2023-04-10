@@ -20,7 +20,7 @@ class Restaurant implements \JsonSerializable
     const RAMEN_VALUES = array(4, 6, 8, 10, 12, 14, 16, 18, 20, 22);
     const WORKERS_SPEED = 3.0; // Minutes per ramen per worker
     const WORKERS_COST = 100;
-    const MAX_WORKERS_PERCENTAGE = 2; // percent
+    const MAX_WORKERS_PERCENTAGE = 1; // percent
     
     const STAR_WORKERS_SPEED_COEF = 0.95;
     const STAR_UPGRADE_PRICES_COEF = 10;

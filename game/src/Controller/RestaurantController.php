@@ -102,7 +102,7 @@ class RestaurantController extends AbstractController
     
         // Let's not forget to actually withdraw the money (only if it's not the first restaurant)
         if ($count >= 1) {
-            $user->withdrawMoney(Restaurant::PRICE);
+            $user->withdrawMoney(Restaurant::getPrice());
         }
 
         $em = $doctrine->getManager();

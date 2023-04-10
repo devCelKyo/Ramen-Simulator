@@ -533,9 +533,7 @@ class RestaurantController extends AbstractController
         $restaurants = $doctrine->getRepository(Restaurant::class)->findAll();
 
         foreach($restaurants as $restaurant) {
-            if ($restaurant->getWorkers() > $restaurant->getMaxWorkers()) {
-                $restaurant->setWorkers($restaurant->getMaxWorkers());
-            }
+            $restaurant->setWorkers($restaurant->getMaxWorkers());    
             $em->persist($restaurant);
         }
 

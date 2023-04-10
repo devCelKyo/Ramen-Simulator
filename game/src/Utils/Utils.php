@@ -115,4 +115,12 @@ class Utils
 
         return $number;
     }
+
+    public static function getPercentage(\GMP $base, int $percentage)
+    {
+        $result = $base * $percentage;
+        $result = gmp_div_q($result, 100);
+
+        return $result;
+    }
 }

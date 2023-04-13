@@ -490,14 +490,6 @@ class RestaurantController extends AbstractController
         ]);
     }
 
-    #[Route('/test', name:'test')]
-    public function test(): JsonResponse
-    {
-        return $this->json([
-            '122.1B' => Utils::gmpToString(Utils::stringToGMP('122.1B'))
-        ]);
-    }
-
     #[Route('/buy_slot/{discord_id}', name: 'buy_slot')]
     public function buy_slot(ManagerRegistry $doctrine, Request $request, string $discord_id): JsonResponse
     {
@@ -522,26 +514,6 @@ class RestaurantController extends AbstractController
             'error' => 'False',
             'slots' => $owner->getRestaurantSlots(),
             'cost' => Utils::gmpToString($cost)
-        ]);
-    }
-
-    // ADMIN ROUTE FOR PATCH 1.5 TO BE DELETED
-    #[Route('/workers_fix', name: 'workers_fix')]
-    public function workers_fix(ManagerRegistry $doctrine): JsonResponse
-    {
-        $em = $doctrine->getManager();
-        $restaurants = $doctrine->getRepository(Restaurant::class)->findAll();
-
-        foreach($restaurants as $restaurant) {
-            $restaurant->setWorkers($restaurant->getMaxWorkers());    
-            $em->persist($restaurant);
-        }
-
-        $em->flush();
-
-        return $this->json([
-            'error' => 'False',
-            'message' => 'OK'
         ]);
     }
 }

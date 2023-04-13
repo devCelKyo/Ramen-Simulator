@@ -40,7 +40,7 @@ class Utils
     public static function stringToGMP(string $number)
     {
         // Basic regex just to make sure it's not complete nonsense
-        $matches_format = preg_match('#^[0-9]{1,3}(\.[0-9])?[A-Za-z]$#', $number);
+        $matches_format = preg_match('#^[0-9]{1,3}(\.[0-9])?[A-Za-z]{1,}$#', $number);
         $all_numbers = preg_match('#^[0-9]+$#', $number);
         if (!$matches_format && !$all_numbers) {
             throw new \Exception('Invalid number format... how could you miss this?');
@@ -54,7 +54,7 @@ class Utils
 
         // (2) Now, we can assume it's the general case : 000.0A
         $prefixNumber = "";
-        for ($i = 0; $i < strlen($number); $i++) {
+        for ($i = 0; $i < $n; $i++) {
             if ($number[$i] == '.') continue;
             if (is_numeric($number[$i])) {
                 $prefixNumber .= $number[$i];
@@ -63,7 +63,14 @@ class Utils
                 break;
             }
         }
-        $suffix = $number[$n - 1];
+
+        // We need to retrieve the suffix, which is not necessarily the last char because suffixes can be longer than that
+        $suffix = "";
+        for ($i = 0; $i < $n; $i++) {
+            if (!is_numeric($number[$i]) && $number[$i] != '.') {
+                $suffix .= $number[$i];
+            }
+        }
 
         $key = array_search($suffix, self::SUFFIXES);
         if ($key === false) {

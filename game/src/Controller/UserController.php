@@ -112,11 +112,11 @@ class UserController extends AbstractController
     #[Route('/leaderboard', name: 'leaderboard')]
     public function leaderboard(ManagerRegistry $doctrine): JsonResponse
     {
-        $em = $doctrine->getManager();
-        $query = $em->createQuery(
-            'SELECT u FROM App\Entity\User u ORDER BY u.money DESC'
-        );
-        $users = $query->getResult();
+        $users = $doctrine->getRepository(User::class)->findAll();
+        usort($users, function($a, $b){
+            return $b->getMoney() - $a->getMoney();
+        });
+        $users = array_slice($users, 0, 10);
 
         $jsonUsers = [];
         foreach($users as $user) {

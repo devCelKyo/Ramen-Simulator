@@ -183,6 +183,19 @@ class RestaurantController extends AbstractController
                 ]);
             }
         }
+        
+        // Checking whether all the shops are unique : M2RECI found this!
+        $all_ids = array();
+        $all_ids[] = $restaurant_public_id;
+        foreach ($restaurant_public_ids as $current_restaurant_public_id) {
+            $all_ids[] = $current_restaurant_public_id;
+        }
+        if (count($all_ids) != count(array_unique($all_ids))) {
+            return $this->json([
+                'error' => 'True',
+                'message' => 'You cannot use the same shop twice.'
+            ]);
+        }
 
         ////////
         // Actual gameplay checks... Finally!

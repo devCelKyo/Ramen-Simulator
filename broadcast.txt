@@ -1,4 +1,3 @@
-Patch note 1.5.1 :construction_worker: 
+HOTFIX 1.5.2 :construction_worker: 
 
-- Leaderboard calculations are now OK :white_check_mark:
-- Bug with multiple letter suffixes is now fixed. (e.g "Qd" is now recognized)
+- Major loophole allowing restaurants to be star-upgraded indefinitely using themselves as fodder has been fixed

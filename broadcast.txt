@@ -1,3 +1,1 @@
-HOTFIX 1.5.2 :construction_worker: 
-
-- Major loophole allowing restaurants to be star-upgraded indefinitely using themselves as fodder has been fixed
+/

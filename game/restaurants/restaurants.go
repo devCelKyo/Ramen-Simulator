@@ -4,6 +4,7 @@ import "fmt"
 
 type Restaurant struct {
 	name string
+	cash float64
 }
 
 type Ramen struct {

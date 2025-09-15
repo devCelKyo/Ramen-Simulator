@@ -7,27 +7,24 @@ type Restaurant struct {
 }
 
 type Ramen struct {
-	name string
+	name    string
 	receipe []Ingredient
 }
 
-func CreateRamen(name string) Ramen {
-	return Ramen{name} // fix
+func CreateRamen(name string, receipe []Ingredient) Ramen {
+	return Ramen{name, receipe}
 }
+
 type Ingredient struct {
 	name string
 	cost float64
 }
 
-func GetProductionCost(ramen Ramen) {
-	var ing1 = Ingredient{"miso", 2.5}
-	var ing2 = Ingredient{"udon", 5}
-	var receipe = []Ingredient{ing1, ing2}
-	fmt.Println(receipe)
-	// figure out loops and array ffs
-	for (int i = 0; i < receipe.size(); ++i) {
+func GetProductionCost(ramen Ramen) float64 {
+	sum := 0.
+	for _, ing := range ramen.receipe {
 		fmt.Println(ing)
+		sum += ing.cost
 	}
-	return 0 // change when less stupid
+	return sum
 }
-

@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	fmt.Println("Ramen-Simulator II")
-	var ramen = restaurants.CreateRamen("hello")
-	restaurants.GetProductionCost(ramen)
+	fmt.Println("Welcome to Ramen-Simulator II")
+	ramen := restaurants.MISO_RAMEN
+	cost := restaurants.GetProductionCost(ramen)
+	fmt.Println(cost)
 }
+

@@ -2,30 +2,30 @@ package restaurants
 
 type Ingredient struct {
 	name string
-	cost float64
+	cost float32
 }
 
 type Ramen struct {
 	name    string
-	receipe []Ingredient
+	receipe map[Ingredient]int
 }
 
-func createRamen(name string, receipe []Ingredient) Ramen {
+func createRamen(name string, receipe map[Ingredient]int) Ramen {
 	return Ramen{name, receipe}
 }
 
-func (ramen Ramen) getRawProductionCost() float64 {
-	sum := 0.
-	for _, ing := range ramen.receipe {
+func (ramen Ramen) getRawProductionCost() float32 {
+	var sum float32 = 0.
+	for ing := range ramen.receipe {
 		sum += ing.cost
 	}
 	return sum
 }
 
 type Menu struct {
-	ramenCosts map[string]float32 // only ramen name is kept in the map
+	ramenPrices map[string]float32 // only ramen name is kept in the map
 }
 
-func (menu Menu) getCost(ramen Ramen) float32 {
-	return menu.ramenCosts[ramen.name]
+func (menu Menu) getPrice(ramen Ramen) float32 {
+	return menu.ramenPrices[ramen.name]
 }

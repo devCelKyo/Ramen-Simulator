@@ -21,3 +21,11 @@ func (ramen Ramen) getRawProductionCost() float64 {
 	}
 	return sum
 }
+
+type Menu struct {
+	ramenCosts map[string]float32 // only ramen name is kept in the map
+}
+
+func (menu Menu) getCost(ramen Ramen) float32 {
+	return menu.ramenCosts[ramen.name]
+}

@@ -3,17 +3,9 @@ package restaurants
 import "fmt"
 
 type Restaurant struct {
-	name string
-	cash float64
-}
-
-type Ramen struct {
-	name    string
-	receipe []Ingredient
-}
-
-func CreateRamen(name string, receipe []Ingredient) Ramen {
-	return Ramen{name, receipe}
+	name      string
+	cash      float64
+	inventory Inventory
 }
 
 type Ingredient struct {
@@ -21,7 +13,20 @@ type Ingredient struct {
 	cost float64
 }
 
-func GetProductionCost(ramen Ramen) float64 {
+type Inventory struct {
+	stocks map[Ingredient]int
+}
+
+type Ramen struct {
+	name    string
+	receipe []Ingredient
+}
+
+func createRamen(name string, receipe []Ingredient) Ramen {
+	return Ramen{name, receipe}
+}
+
+func (ramen Ramen) getRawProductionCost() float64 {
 	sum := 0.
 	for _, ing := range ramen.receipe {
 		fmt.Println(ing)

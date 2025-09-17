@@ -57,19 +57,11 @@ func (receipe *Receipe) withVegetable(vegetable Ingredient) *Receipe {
 
 type Ramen struct {
 	name    string
-	receipe map[Ingredient]int
+	receipe Receipe
 }
 
-func createRamen(name string, receipe map[Ingredient]int) Ramen {
+func createRamen(name string, receipe Receipe) Ramen {
 	return Ramen{name, receipe}
-}
-
-func (ramen Ramen) getRawProductionCost() float32 {
-	var sum float32 = 0.
-	for ing := range ramen.receipe {
-		sum += ing.cost
-	}
-	return sum
 }
 
 type Menu struct {

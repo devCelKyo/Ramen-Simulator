@@ -1,8 +1,26 @@
 package restaurants
 
+type IngredientType int
+
+const (
+	Broth IngredientType = iota
+	Noodles
+	Protein
+	Vegetable
+)
+
 type Ingredient struct {
-	name string
-	cost float32
+	name    string
+	cost    float32
+	ingType IngredientType
+}
+
+// Should be encapsulated in a "receipe" package to maintain invariants
+type Receipe struct {
+	broth     Ingredient
+	noodles   Ingredient
+	protein   []Ingredient
+	vegetable []Ingredient
 }
 
 type Ramen struct {

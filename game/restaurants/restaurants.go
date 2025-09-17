@@ -13,7 +13,6 @@ func (rest *Restaurant) giveMoney(money float32) {
 
 func (rest *Restaurant) cook(ramen Ramen) {
 	price := rest.menu.getPrice(ramen)
-	revenue := price - ramen.getRawProductionCost()
 	rest.inventory.withdraw(ramen.receipe)
-	rest.giveMoney(revenue)
+	rest.giveMoney(price)
 }

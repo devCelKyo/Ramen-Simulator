@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"game/restaurants"
 )
 
 func main() {

@@ -23,6 +23,38 @@ type Receipe struct {
 	vegetable []Ingredient
 }
 
+func MakeReceipe() Receipe {
+	return Receipe{}
+}
+
+func (receipe *Receipe) withBroth(broth Ingredient) *Receipe {
+	if broth.ingType == Broth {
+		receipe.broth = broth
+	}
+	return receipe
+}
+
+func (receipe *Receipe) withNoodles(noodles Ingredient) *Receipe {
+	if noodles.ingType == Noodles {
+		receipe.noodles = noodles
+	}
+	return receipe
+}
+
+func (receipe *Receipe) withProtein(protein Ingredient) *Receipe {
+	if protein.ingType == Protein {
+		receipe.protein = append(receipe.protein, protein)
+	}
+	return receipe
+}
+
+func (receipe *Receipe) withVegetable(vegetable Ingredient) *Receipe {
+	if vegetable.ingType == Vegetable {
+		receipe.vegetable = append(receipe.vegetable, vegetable)
+	}
+	return receipe
+}
+
 type Ramen struct {
 	name    string
 	receipe map[Ingredient]int

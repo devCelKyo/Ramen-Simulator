@@ -1,0 +1,11 @@
+TODO:
+- Restaurants (name, bank, stocks, menu)
+
+- Ramen
+-- Ingredients (name, type)
+-- Receipe (builder pattern to validate constraints)
+-- Menu
+
+- Inventory, for restaurant stocks tracking
+
+- Hopefully, a new catalog?

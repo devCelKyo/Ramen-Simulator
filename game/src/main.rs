@@ -2,6 +2,10 @@ use std::collections::HashMap;
 
 fn main() {
     println!("Welcome to Ramen Simulator!");
+    let rest = Restaurant {
+        name: "ichiraku".to_owned(),
+        cash: 0.,
+    };
 }
 
 struct Restaurant {
@@ -9,6 +13,7 @@ struct Restaurant {
     cash: f64,
 }
 
+#[derive(PartialEq)]
 enum IngredientType {
     Broth,
     Noodles,
@@ -30,4 +35,26 @@ struct Receipe {
     noodles: Ingredient,
     proteins: Vec<Ingredient>,
     vegetables: Vec<Ingredient>,
+}
+
+impl Receipe {
+    fn is_valid(&self) -> bool {
+        if self.broth.ing_type != IngredientType::Broth {
+            return false;
+        }
+        if self.noodles.ing_type != IngredientType::Noodles {
+            return false;
+        }
+        for ing in self.proteins.iter() {
+            if ing.ing_type != IngredientType::Protein {
+                return false;
+            }
+        }
+        for ing in self.vegetables.iter() {
+            if ing.ing_type != IngredientType::Vegetable {
+                return false;
+            }
+        }
+        return true;
+    }
 }

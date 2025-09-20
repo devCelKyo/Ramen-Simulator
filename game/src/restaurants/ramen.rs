@@ -2,12 +2,12 @@ use super::ingredients::Receipe;
 use std::collections::HashMap;
 
 pub struct Ramen {
-    name: String,
-    receipe: Receipe,
+    pub name: String,
+    pub receipe: Receipe,
 }
 
 pub struct Menu {
-    prices: HashMap<String, f64>,
+    pub prices: HashMap<String, f64>,
 }
 
 impl Menu {

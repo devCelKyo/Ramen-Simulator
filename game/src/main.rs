@@ -1,9 +1,5 @@
-#![allow(dead_code)]
-
-mod restaurants;
+use game::run;
 
 fn main() {
-    println!("Welcome to Ramen Simulator!");
-    let rest = restaurants::Restaurant::new("ichiraku");
-    println!("{:?}", rest.name);
+    run();
 }

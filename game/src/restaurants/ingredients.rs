@@ -8,13 +8,13 @@ enum IngredientType {
     Vegetable,
 }
 
-struct Ingredient {
+pub struct Ingredient {
     name: String,
     ing_type: IngredientType,
 }
 
 pub struct Inventory {
-    stocks: HashMap<Ingredient, i32>,
+    pub stocks: HashMap<Ingredient, i32>,
 }
 
 impl Inventory {
@@ -26,10 +26,10 @@ impl Inventory {
 }
 
 pub struct Receipe {
-    broth: Ingredient,
-    noodles: Ingredient,
-    proteins: Vec<Ingredient>,
-    vegetables: Vec<Ingredient>,
+    pub broth: Ingredient,
+    pub noodles: Ingredient,
+    pub proteins: Vec<Ingredient>,
+    pub vegetables: Vec<Ingredient>,
 }
 
 impl Receipe {

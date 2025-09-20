@@ -13,8 +13,16 @@ struct Ingredient {
     ing_type: IngredientType,
 }
 
-struct Inventory {
+pub struct Inventory {
     stocks: HashMap<Ingredient, i32>,
+}
+
+impl Inventory {
+    pub fn new() -> Self {
+        Self {
+            stocks: HashMap::new()
+        }
+    }
 }
 
 pub struct Receipe {

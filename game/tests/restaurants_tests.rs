@@ -10,3 +10,9 @@ fn init_restaurant() {
     assert!(rest.menu.prices.is_empty());
     assert!(rest.stocks.stocks.is_empty());
 }
+
+#[test]
+fn init_basic_ramen() {
+    let ramen = catalog::ramen();
+    assert!(ramen.receipe.is_valid());
+}

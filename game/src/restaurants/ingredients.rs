@@ -42,12 +42,17 @@ pub struct Receipe {
     pub vegetables: Option<Vec<Ingredient>>,
 }
 
+#[derive(Debug)]
 pub enum RecipeError {
     InvalidIngredient { expected: IngredientType, found: IngredientType },
 }
 
 impl Receipe {
-    fn is_valid(&self) -> bool {
+    pub fn new() -> Self {
+        Receipe::default()
+    }
+
+    pub fn is_valid(&self) -> bool {
         if !self.broth.as_ref().map_or(false, |b| b.ing_type == IngredientType::Broth) {
             return false;
         }
@@ -61,10 +66,6 @@ impl Receipe {
             return false;
         }
         true
-    }
-
-    pub fn new() -> Self {
-        Receipe::default()
     }
 
     pub fn with_broth(mut self, ing: Ingredient) -> Result<Self, RecipeError> {

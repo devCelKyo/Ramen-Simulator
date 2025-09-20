@@ -1,11 +1,11 @@
 TODO:
-- Restaurants (name, bank, stocks, menu)
+- DONE: Restaurants (name, bank, stocks, menu)
 
 - Ramen
--- Ingredients (name, type)
--- Receipe (builder pattern to validate constraints)
--- Menu
+-- DONE: Ingredients (name, type)
+-- DONE: Receipe (builder pattern to validate constraints)
+-- todo: Menu
 
-- Inventory, for restaurant stocks tracking
+- todo: Inventory, for restaurant stocks tracking
 
-- Hopefully, a new catalog?
+- wip: Hopefully, a new catalog?

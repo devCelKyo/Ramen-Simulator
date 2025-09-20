@@ -34,22 +34,18 @@ pub struct Receipe {
 
 impl Receipe {
     fn is_valid(&self) -> bool {
-        if self.broth.is_some() && self.broth.?ing_type != IngredientType::Broth {
+        if !self.broth.as_ref().map_or(false, |b| b.ing_type == IngredientType::Broth) {
             return false;
         }
-        if self.noodles.ing_type != IngredientType::Noodles {
+        if !self.noodles.as_ref().map_or(false, |n| n.ing_type == IngredientType::Noodles) {
             return false;
         }
-        for ing in self.proteins.iter() {
-            if ing.ing_type != IngredientType::Protein {
-                return false;
-            }
+        if !self.proteins.as_ref().map_or(false, |v| v.iter().all(|i| i.ing_type == IngredientType::Protein)) {
+            return false;
         }
-        for ing in self.vegetables.iter() {
-            if ing.ing_type != IngredientType::Vegetable {
-                return false;
-            }
+        if !self.vegetables.as_ref().map_or(false, |v| v.iter().all(|i| i.ing_type == IngredientType::Vegetable)) {
+            return false;
         }
-        return true;
+        true
     }
 }

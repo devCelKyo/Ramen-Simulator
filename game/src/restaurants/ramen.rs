@@ -6,6 +6,15 @@ pub struct Ramen {
     pub receipe: Receipe,
 }
 
+impl Ramen {
+    pub fn new(name: &str, receipe: Receipe) -> Self {
+        Self {
+            name: String::from(name),
+            receipe: receipe,
+        }
+    }
+}
+
 pub struct Menu {
     pub prices: HashMap<String, f64>,
 }

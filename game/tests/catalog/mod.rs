@@ -1,5 +1,13 @@
-use game::*;
+use game::restaurants::*;
 
-fn ramen() -> restaurants::Ramen {
-    restaurants::Ramen::new();
+fn miso() -> Ingredient {
+    Ingredient::new("Miso", IngredientType::Broth)
+}
+
+fn receipe() -> Receipe {
+    Receipe::new().with_broth(miso())
+}
+
+fn ramen() -> Ramen {
+    Ramen::new("miso");
 }

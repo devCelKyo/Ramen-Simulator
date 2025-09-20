@@ -1,5 +1,7 @@
 use game::restaurants::Restaurant;
 
+mod catalog;
+
 #[test]
 fn init_restaurant() {
     let rest = Restaurant::new("TEST");

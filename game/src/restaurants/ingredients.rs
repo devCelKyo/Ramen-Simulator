@@ -26,15 +26,15 @@ impl Inventory {
 }
 
 pub struct Receipe {
-    pub broth: Ingredient,
-    pub noodles: Ingredient,
-    pub proteins: Vec<Ingredient>,
-    pub vegetables: Vec<Ingredient>,
+    pub broth: Option<Ingredient>,
+    pub noodles: Option<Ingredient>,
+    pub proteins: Option<Vec<Ingredient>>,
+    pub vegetables: Option<Vec<Ingredient>>,
 }
 
 impl Receipe {
     fn is_valid(&self) -> bool {
-        if self.broth.ing_type != IngredientType::Broth {
+        if self.broth.is_some() && self.broth.?ing_type != IngredientType::Broth {
             return false;
         }
         if self.noodles.ing_type != IngredientType::Noodles {

@@ -1,4 +1,4 @@
-use super::ingredients::Receipe;
+use super::Receipe;
 use std::collections::HashMap;
 
 pub struct Ramen {

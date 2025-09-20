@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 pub enum IngredientType {
     Broth,
     Noodles,
@@ -8,6 +8,7 @@ pub enum IngredientType {
     Vegetable,
 }
 
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Ingredient {
     pub name: String,
     pub ing_type: IngredientType,
@@ -32,6 +33,20 @@ impl Inventory {
             stocks: HashMap::new()
         }
     }
+
+    pub fn can_cook(&self, receipe: &Receipe) -> bool {
+        if let Some(b) = &receipe.broth {
+            match self.stocks.get(b) {
+                Some(qte) => {
+                    if *qte == 0 {
+                        return false;
+                    }
+                },
+                None => return false
+            }
+        }
+        true
+    }
 }
 
 #[derive(Default)]
@@ -42,7 +57,7 @@ pub struct Receipe {
     pub vegetables: Option<Vec<Ingredient>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum RecipeError {
     InvalidIngredient { expected: IngredientType, found: IngredientType },
 }

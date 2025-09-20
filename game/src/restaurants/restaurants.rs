@@ -9,12 +9,21 @@ pub struct Restaurant {
 }
 
 impl Restaurant {
-    pub fn new(name: &str) -> Restaurant {
+    pub fn default(name: &str) -> Restaurant {
         Self {
             name: String::from(name),
             cash: 0.,
             menu: Menu::new(),
             stocks: Inventory::new(),
+        }
+    }
+
+    pub fn new(name: &str, cash: f64, menu: Menu, stocks: Inventory) -> Restaurant {
+        Self {
+            name: String::from(name),
+            cash: cash,
+            menu: menu,
+            stocks: stocks,
         }
     }
 }

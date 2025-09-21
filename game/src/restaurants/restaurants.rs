@@ -1,11 +1,13 @@
 use super::Menu;
 use super::Inventory;
+use super::OrderQueue;
 
 pub struct Restaurant {
     pub name: String,
     pub cash: f64,
     pub menu: Menu,
     pub stocks: Inventory,
+    placed_orders: OrderQueue,
 }
 
 impl Restaurant {
@@ -15,6 +17,7 @@ impl Restaurant {
             cash: 0.,
             menu: Menu::default(),
             stocks: Inventory::new(),
+            placed_orders: OrderQueue::new(),
         }
     }
 
@@ -24,6 +27,7 @@ impl Restaurant {
             cash: cash,
             menu: menu,
             stocks: stocks,
+            placed_orders: OrderQueue::new(),
         }
     }
 }

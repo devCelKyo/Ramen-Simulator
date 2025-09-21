@@ -13,7 +13,7 @@ impl Restaurant {
         Self {
             name: String::from(name),
             cash: 0.,
-            menu: Menu::new(),
+            menu: Menu::default(),
             stocks: Inventory::new(),
         }
     }

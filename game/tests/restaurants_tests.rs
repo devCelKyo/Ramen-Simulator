@@ -7,7 +7,7 @@ fn init_empty_restaurant() {
     let rest = Restaurant::default("TEST");
     assert_eq!(rest.name, "TEST");
     assert_eq!(rest.cash, 0.);
-    assert!(rest.menu.prices.is_empty());
+    assert!(rest.menu.is_empty());
     assert!(rest.stocks.is_empty());
 }
 

@@ -38,5 +38,5 @@ fn inventory() -> Inventory {
 }
 
 pub fn basic_restaurant() -> Restaurant {
-    Restaurant::new("Test Restaurant", 1000., Menu::new(), inventory())
+    Restaurant::new("Test Restaurant", 1000., Menu::default(), inventory())
 }

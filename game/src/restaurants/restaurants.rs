@@ -1,5 +1,7 @@
 use super::Menu;
 use super::Inventory;
+
+use super::Order;
 use super::OrderQueue;
 
 pub type RestaurantKey = i32;
@@ -33,5 +35,9 @@ impl Restaurant {
             stocks: stocks,
             placed_orders: OrderQueue::new(),
         }
+    }
+
+    pub fn place_order(&mut self, order: Order) {
+        self.placed_orders.place_order(order);
     }
 }

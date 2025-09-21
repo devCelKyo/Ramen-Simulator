@@ -3,6 +3,7 @@ use super::Ramen;
 
 pub struct Order {
     pub ramen: Ramen,
+    pub price: f64
 }
 
 pub struct OrderQueue {

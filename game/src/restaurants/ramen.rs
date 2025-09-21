@@ -1,6 +1,7 @@
 use super::Receipe;
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct Ramen {
     pub name: String,
     pub receipe: Receipe,
@@ -56,5 +57,13 @@ impl Menu {
 
     pub fn get_price_from_ramen(&self, ramen: &Ramen) -> Option<f64> {
         self.get_price_from_name(&ramen.name)
+    }
+
+    pub fn get_one(&self) -> Option<(&Ramen, f64)> {
+        let entry = self.ramens.iter().next();
+        entry.map_or(None, |tuple| {
+            let price = self.get_price_from_name(tuple.0).unwrap();
+            Some((tuple.1, price))
+        })
     }
 }

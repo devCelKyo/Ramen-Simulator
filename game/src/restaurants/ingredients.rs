@@ -70,7 +70,7 @@ impl Inventory {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Receipe {
     broth: Option<Ingredient>,
     noodles: Option<Ingredient>,

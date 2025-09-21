@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 pub mod restaurants;
+pub mod simulation;
 
 pub fn run() {
     println!("Welcome to Ramen Simulator!");

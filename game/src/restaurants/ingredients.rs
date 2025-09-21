@@ -34,27 +34,23 @@ impl Inventory {
         }
     }
 
+    // Can't handle eventual duplicates in protein and vegetables
     pub fn can_cook(&self, receipe: &Receipe) -> bool {
-        if let Some(b) = &receipe.broth {
-            match self.stocks.get(b) {
-                Some(qte) => {
-                    if *qte == 0 {
-                        return false;
-                    }
-                },
-                None => return false
+        receipe.iter().all(
+            |ing| {
+                self.stocks.get(ing).map_or(false,
+                |&qte| qte > 0)
             }
-        }
-        true
+        )
     }
 }
 
 #[derive(Default)]
 pub struct Receipe {
-    pub broth: Option<Ingredient>,
-    pub noodles: Option<Ingredient>,
-    pub proteins: Option<Vec<Ingredient>>,
-    pub vegetables: Option<Vec<Ingredient>>,
+    broth: Option<Ingredient>,
+    noodles: Option<Ingredient>,
+    proteins: Option<Vec<Ingredient>>,
+    vegetables: Option<Vec<Ingredient>>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -127,5 +123,12 @@ impl Receipe {
             }
         }
         Ok(self)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Ingredient> {
+        self.broth.iter()
+            .chain(self.noodles.iter())
+            .chain(self.proteins.iter().flatten())
+            .chain(self.vegetables.iter().flatten())
     }
 }

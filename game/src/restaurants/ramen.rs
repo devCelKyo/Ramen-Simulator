@@ -49,4 +49,12 @@ impl Menu {
         self.ramens.insert(name.clone(), ramen);
         self
     }
+
+    pub fn get_price_from_name(&self, name: &String) -> Option<f64> {
+        self.prices.get(name).copied()
+    }
+
+    pub fn get_price_from_ramen(&self, ramen: &Ramen) -> Option<f64> {
+        self.get_price_from_name(&ramen.name)
+    }
 }

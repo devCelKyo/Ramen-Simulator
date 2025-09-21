@@ -29,7 +29,7 @@ pub fn basic_ramen() -> Ramen {
     Ramen::new("miso", basic_receipe().unwrap())
 }
 
-fn inventory() -> Inventory {
+fn basic_inventory() -> Inventory {
     Inventory::new()
     .add(&miso(), 10)
     .add(&chinese_noodles(), 10)
@@ -37,6 +37,12 @@ fn inventory() -> Inventory {
     .add(&seaweed(), 10)
 }
 
+fn basic_menu() -> Menu {
+    let mut menu = Menu::default();
+    menu.push_ramen(basic_ramen(), 10.);
+    menu
+}
+
 pub fn basic_restaurant() -> Restaurant {
-    Restaurant::new("Test Restaurant", 1000., Menu::default(), inventory())
+    Restaurant::new("Test Restaurant", 1000., basic_menu(), basic_inventory())
 }

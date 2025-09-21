@@ -24,4 +24,10 @@ fn init_basic_restaurant() {
 
     let ramen = catalog::basic_ramen();
     assert!(restaurant.stocks.can_cook(&ramen.receipe));
+
+    assert!(!restaurant.menu.is_empty());
+
+    let expected_ramen_price = 10.;
+    assert_eq!(restaurant.menu.get_price_from_name(&ramen.name).unwrap(), expected_ramen_price);
+    assert_eq!(restaurant.menu.get_price_from_ramen(&ramen).unwrap(), expected_ramen_price);
 }

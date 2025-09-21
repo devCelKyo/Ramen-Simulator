@@ -24,7 +24,7 @@ impl Ingredient {
 }
 
 pub struct Inventory {
-    pub stocks: HashMap<Ingredient, i32>,
+    stocks: HashMap<Ingredient, i32>,
 }
 
 pub enum InventoryError {
@@ -38,7 +38,7 @@ impl Inventory {
         }
     }
 
-    pub fn add(&mut self, ing: &Ingredient, qte: i32) -> &Self {
+    pub fn add(mut self, ing: &Ingredient, qte: i32) -> Self {
         *self.stocks.entry(ing.clone()).or_insert(0) += qte;
 
         self
@@ -53,6 +53,10 @@ impl Inventory {
             *self.stocks.entry(ing.clone()).or_insert(0) -= 1;
         }
         Ok(self)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.stocks.is_empty()
     }
 
     // Can't handle eventual duplicates in protein and vegetables

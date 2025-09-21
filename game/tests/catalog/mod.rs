@@ -16,7 +16,7 @@ fn seaweed() -> Ingredient {
     Ingredient::new("Seaweed", IngredientType::Vegetable)
 }
 
-fn receipe() -> Result<Receipe, RecipeError> {
+fn basic_receipe() -> Result<Receipe, RecipeError> {
     Ok(Receipe::new()
     .with_broth(miso())?
     .with_noodles(chinese_noodles())?
@@ -25,6 +25,18 @@ fn receipe() -> Result<Receipe, RecipeError> {
     .expect("Incomplete receipe"))
 }
 
-pub fn ramen() -> Ramen {
-    Ramen::new("miso", receipe().unwrap())
+pub fn basic_ramen() -> Ramen {
+    Ramen::new("miso", basic_receipe().unwrap())
+}
+
+fn inventory() -> Inventory {
+    Inventory::new()
+    .add(&miso(), 10)
+    .add(&chinese_noodles(), 10)
+    .add(&ground_beef(), 10)
+    .add(&seaweed(), 10)
+}
+
+pub fn basic_restaurant() -> Restaurant {
+    Restaurant::new("Test Restaurant", 1000., Menu::new(), inventory())
 }

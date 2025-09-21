@@ -8,7 +8,7 @@ pub enum IngredientType {
     Vegetable,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Ingredient {
     pub name: String,
     pub ing_type: IngredientType,
@@ -27,11 +27,32 @@ pub struct Inventory {
     pub stocks: HashMap<Ingredient, i32>,
 }
 
+pub enum InventoryError {
+    NotEnoughIngredient
+}
+
 impl Inventory {
     pub fn new() -> Self {
         Self {
             stocks: HashMap::new()
         }
+    }
+
+    pub fn add(&mut self, ing: &Ingredient, qte: i32) -> &Self {
+        *self.stocks.entry(ing.clone()).or_insert(0) += qte;
+
+        self
+    }
+
+    pub fn withdraw_receipe(&mut self, receipe: &Receipe) -> Result<&Self, InventoryError> {
+        if !self.can_cook(receipe) {
+            return Err(InventoryError::NotEnoughIngredient);
+        }
+
+        for ing in receipe.iter() {
+            *self.stocks.entry(ing.clone()).or_insert(0) -= 1;
+        }
+        Ok(self)
     }
 
     // Can't handle eventual duplicates in protein and vegetables

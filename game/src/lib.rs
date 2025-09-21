@@ -4,6 +4,6 @@ pub mod restaurants;
 
 pub fn run() {
     println!("Welcome to Ramen Simulator!");
-    let rest = restaurants::Restaurant::new("ichiraku");
+    let rest = restaurants::Restaurant::default("ichiraku");
     println!("{:?}", rest.name);
 }

@@ -11,7 +11,7 @@ pub struct Restaurant {
     pub cash: f64,
     pub menu: Menu,
     pub stocks: Inventory,
-    placed_orders: OrderQueue,
+    pub placed_orders: OrderQueue,
 }
 
 impl Restaurant {
@@ -35,9 +35,5 @@ impl Restaurant {
             stocks: stocks,
             placed_orders: OrderQueue::new(),
         }
-    }
-
-    pub fn place_order(&mut self, order: Order) {
-        self.placed_orders.place_order(order);
     }
 }

@@ -25,9 +25,8 @@ impl OrderQueue {
         self.orders.len()
     }
 
-    pub fn pop_first(&mut self) -> Order {
-        assert!(!self.is_empty());
-        self.orders.pop_front().unwrap()
+    pub fn pop_first(&mut self) -> Option<Order> {
+        self.orders.pop_front()
     }
 
     pub fn place_order(&mut self, order: Order) {

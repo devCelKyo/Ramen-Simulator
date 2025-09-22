@@ -41,6 +41,8 @@ impl SimulationEngine {
         let steps = duration.as_secs() / self.increment.as_secs();
         
         // hard coded shit
+        // Eventually, customer entering the restaurant should be on a certain probability at each increment
+        // This should be based on demand and capacity (to be calculated later, depending on restaurant)
         let time_between_customers = Duration::from_secs(60);
         let order_processing_time = Duration::from_secs(30);
         //
@@ -50,21 +52,35 @@ impl SimulationEngine {
         let mut order_being_processed: Option<Order> = None;
 
         for _ in 0..steps {
+            // If a customer enters, he places an order
             if time_before_next_customer == Duration::ZERO {
                 time_before_next_customer = time_between_customers;
                 let picked = rest.menu.get_one();
                 match picked {
                     Some(t) => {
                         let order = Order{ramen: (t.0).clone(), price:t.1};
-                        rest.place_order(order);
+                        rest.placed_orders.place_order(order);
                     },
                     None => continue
                 }
             }
 
-            // TODO: 
-            // - If no order is being processed, pick one from the top and start processing it
-            // - If an order is being processed, keep doing it
+            match order_being_processed {
+                Some(_) => time_before_order_is_done = time_before_order_is_done.saturating_sub(self.increment),
+                None => {
+                    order_being_processed = rest.placed_orders.pop_first();
+                    time_before_order_is_done = order_processing_time;
+                },
+            }
+
+            // If order is done
+            if time_before_order_is_done == Duration::ZERO {
+                if let Some(order) = order_being_processed.as_ref() {
+                    rest.cash += order.price;
+                }
+            }
+
+            time_before_next_customer = time_before_next_customer.saturating_sub(self.increment);
         }
     }
 }

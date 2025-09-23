@@ -1,7 +1,6 @@
 use super::Menu;
 use super::Inventory;
 
-use super::Order;
 use super::OrderQueue;
 
 pub type RestaurantKey = i32;

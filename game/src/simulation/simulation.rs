@@ -24,6 +24,10 @@ impl SimulationEngine {
         self.update_states.insert(id, SystemTime::now());
     }
 
+    pub fn seek_restaurant(&self, key: RestaurantKey) -> Option<&Restaurant> {
+        return self.restaurants.get(&key)
+    }
+
     /// Assumes Restaurant is loaded and cached
     pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) {
         let rest = self.restaurants.get_mut(&key).unwrap();

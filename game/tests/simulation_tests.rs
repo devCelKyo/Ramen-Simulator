@@ -9,8 +9,9 @@ fn basic_simulation() {
     let restaurant = catalog::basic_restaurant();
     let key = restaurant.id;
     sim.push_restaurant(restaurant);
-    let mut rest = sim.seek_restaurant(key).unwrap();
-    let cash = rest.cash.clone();    
+    let cash = sim.seek_restaurant(key).unwrap().cash;
     sim.simulate(key, SystemTime::now().checked_add(Duration::from_secs(180)).unwrap()); // We expect to serve at least 2 orders in that interval
-    let cashafter = rest.cash.clone();
+    let cash_after = sim.seek_restaurant(key).unwrap().cash;
+
+    assert!(cash_after > cash);
 }

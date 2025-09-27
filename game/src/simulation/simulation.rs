@@ -9,6 +9,12 @@ pub struct SimulationEngine {
     increment: Duration
 }
 
+pub struct SimulationOutput {
+    pub restaurant: RestaurantKey,
+    pub earnings: f64,
+    pub ramen_served: i32,
+}
+
 impl SimulationEngine {
     pub fn new() -> SimulationEngine {
         Self {
@@ -29,19 +35,20 @@ impl SimulationEngine {
     }
 
     /// Assumes Restaurant is loaded and cached
-    pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) {
+    pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) -> Option<SimulationOutput> {
         let rest = self.restaurants.get_mut(&key).unwrap();
-        
         let last_updated = self.update_states.get(&key).unwrap();
+
         let maybe_duration = time.duration_since(*last_updated);
         if maybe_duration.is_err() {
-            return;
+            return None;
         }
         let duration = maybe_duration.unwrap();
         if duration < self.increment {
-            return;
+            return None;
         }
         
+        let mut output = SimulationOutput{restaurant: key, earnings: 0., ramen_served: 0};
         let steps = duration.as_secs() / self.increment.as_secs();
         
         // hard coded shit
@@ -81,10 +88,13 @@ impl SimulationEngine {
             if time_before_order_is_done == Duration::ZERO {
                 if let Some(order) = order_being_processed.as_ref() {
                     rest.cash += order.price;
+                    output.earnings += order.price;
+                    output.ramen_served += 1;
                 }
             }
 
             time_before_next_customer = time_before_next_customer.saturating_sub(self.increment);
         }
+        Some(output)
     }
 }

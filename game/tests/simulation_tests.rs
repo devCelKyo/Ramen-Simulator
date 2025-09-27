@@ -7,11 +7,16 @@ mod catalog;
 fn basic_simulation() {
     let mut sim = SimulationEngine::new();
     let restaurant = catalog::basic_restaurant();
+    
+    let cash_start = restaurant.cash;
     let key = restaurant.id;
+    
     sim.push_restaurant(restaurant);
-    let cash = sim.seek_restaurant(key).unwrap().cash;
-    sim.simulate(key, SystemTime::now().checked_add(Duration::from_secs(180)).unwrap()); // We expect to serve at least 2 orders in that interval
+    let output = sim.simulate(key, SystemTime::now().checked_add(Duration::from_secs(180)).unwrap()).unwrap(); // We expect to serve at least 2 orders in that interval
     let cash_after = sim.seek_restaurant(key).unwrap().cash;
 
-    assert!(cash_after > cash);
+    assert!(cash_after > cash_start);
+    assert_eq!(cash_after - cash_start, output.earnings);
+    
+    assert!(2 <= output.ramen_served);
 }

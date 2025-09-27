@@ -34,16 +34,22 @@ impl SimulationEngine {
         return self.restaurants.get(&key)
     }
 
-    /// Assumes Restaurant is loaded and cached
     pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) -> Option<SimulationOutput> {
-        let rest = self.restaurants.get_mut(&key).unwrap();
-        let last_updated = self.update_states.get(&key).unwrap();
+        let rest = match self.restaurants.get_mut(&key) {
+            Some(r) => r,
+            None => return None
+        };
 
-        let maybe_duration = time.duration_since(*last_updated);
-        if maybe_duration.is_err() {
-            return None;
-        }
-        let duration = maybe_duration.unwrap();
+        let last_updated = match self.update_states.get(&key) {
+            Some(u) => u,
+            None => return None
+        };
+
+        let duration = match time.duration_since(*last_updated) {
+            Ok(d) => d,
+            Err(_) => return None
+        };
+        
         if duration < self.increment {
             return None;
         }

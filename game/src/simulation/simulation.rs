@@ -98,7 +98,6 @@ impl SimulationEngine {
                     output.ramen_served += 1;
                 }
             }
-
             time_before_next_customer = time_before_next_customer.saturating_sub(self.increment);
         }
         Some(output)

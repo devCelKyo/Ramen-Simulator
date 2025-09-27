@@ -1,3 +1,10 @@
+WIP: big simulation loop
+Simulation Is One Big Loop:
+
+ 
+
+
+
 Simulation:
 -- During a tick, there should be two main entities:
   - Some sort of "CustomerDemandCalculator" that produces customers based on offer and demand

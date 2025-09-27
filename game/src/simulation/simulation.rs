@@ -62,17 +62,16 @@ impl SimulationEngine {
         // This should be based on demand and capacity (to be calculated later, depending on restaurant)
         let time_between_customers = Duration::from_secs(60);
         let order_processing_time = Duration::from_secs(30);
-        //
 
         let mut time_before_next_customer = Duration::ZERO;
         let mut time_before_order_is_done = Duration::ZERO;
         let mut order_being_processed: Option<Order> = None;
 
         for _ in 0..steps {
-            // If a customer enters, he places an order
+            // Customer generation
             if time_before_next_customer == Duration::ZERO {
                 time_before_next_customer = time_between_customers;
-                let picked = rest.menu.get_one();
+                let picked: Option<(&Ramen, f64)> = rest.menu.get_one();
                 match picked {
                     Some(t) => {
                         let order = Order{ramen: (t.0).clone(), price:t.1};
@@ -82,6 +81,7 @@ impl SimulationEngine {
                 }
             }
 
+            // Order processing
             match order_being_processed {
                 Some(_) => time_before_order_is_done = time_before_order_is_done.saturating_sub(self.increment),
                 None => {

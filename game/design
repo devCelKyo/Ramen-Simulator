@@ -1,11 +1,8 @@
-TODO:
-- DONE: Restaurants (name, bank, stocks, menu)
+Simulation:
+-- During a tick, there should be two main entities:
+  - Some sort of "CustomerDemandCalculator" that produces customers based on offer and demand
+  - An "OrderProcessor" that only processes order queue based on restaurant and employees
 
-- Ramen
--- DONE: Ingredients (name, type)
--- DONE: Receipe (builder pattern to validate constraints)
--- todo: Menu
-
-- todo: Inventory, for restaurant stocks tracking
-
-- wip: Hopefully, a new catalog?
+-- What happens during a tick?
+  - Is a customer entering? Customers enter and place an order based on menu. (based on demand, DemandCalculator produces a customer with an order)
+  - OrderProcessor handles orders: if an order is being processed keep doing it, else pop a new order, else sleep.

@@ -1,11 +1,13 @@
 use crate::restaurants::*;
 
+use std::alloc::System;
 use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
+use super::RestaurantEngine;
+
 pub struct SimulationEngine {
-    restaurants: HashMap<RestaurantKey, Restaurant>,
-    update_states: HashMap<RestaurantKey, SystemTime>,
+    restaurants: HashMap<RestaurantKey, RestaurantEngine>,
     increment: Duration
 }
 
@@ -15,43 +17,45 @@ pub struct SimulationOutput {
     pub ramen_served: i32,
 }
 
+pub enum SimulationError {
+    RestaurantNotFound,
+    InvalidDuration,
+} 
+
 impl SimulationEngine {
     pub fn new() -> SimulationEngine {
         Self {
             restaurants: HashMap::new(),
-            update_states: HashMap::new(),
             increment: Duration::from_secs(5),
         }
     }
 
     pub fn push_restaurant(&mut self, restaurant: Restaurant) {
         let id = restaurant.id;
-        self.restaurants.insert(id, restaurant);
-        self.update_states.insert(id, SystemTime::now());
+        self.restaurants.insert(id, RestaurantEngine::new(restaurant, SystemTime::now()));
     }
 
     pub fn seek_restaurant(&self, key: RestaurantKey) -> Option<&Restaurant> {
-        return self.restaurants.get(&key)
+        match self.restaurants.get(&key) {
+            Some(engine) => Some(&engine.restaurant),
+            None => None,
+        }
     }
 
-    pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) -> Option<SimulationOutput> {
-        let rest = match self.restaurants.get_mut(&key) {
+    pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) -> Result<SimulationOutput, SimulationError> {
+        let restaurant_engine = match self.restaurants.get_mut(&key) {
             Some(r) => r,
-            None => return None
+            None => return Err(SimulationError::RestaurantNotFound)
         };
 
-        let last_updated = match self.update_states.get(&key) {
-            Some(u) => u,
-            None => return None
-        };
-
+        let last_updated = &restaurant_engine.update_state;
         let duration = match time.duration_since(*last_updated) {
             Ok(d) => d,
-            Err(_) => return None
+            Err(_) => return Err(SimulationError::InvalidDuration)
         };
         
         if duration < self.increment {
-            return None;
+            return Err(SimulationError::InvalidDuration);
         }
         
         let mut output = SimulationOutput{restaurant: key, earnings: 0., ramen_served: 0};

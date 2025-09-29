@@ -78,19 +78,9 @@ impl SimulationEngine {
             // order_processor.tick(duration) --> returns the order if done
 
             // Customer generation
-            if time_before_next_customer == Duration::ZERO {
-                time_before_next_customer = time_between_customers;
-                let picked: Option<(&Ramen, f64)> = rest.menu.get_one();
-                match picked {
-                    Some(t) => {
-                        let order = Order{ramen: (t.0).clone(), price:t.1};
-                        rest.placed_orders.place_order(order);
-                    },
-                    None => continue
-                }
-            }
 
             // Order processing
+            // TODO MOVE ME IN ORDERPROCESSOR
             match order_being_processed {
                 Some(_) => time_before_order_is_done = time_before_order_is_done.saturating_sub(self.increment),
                 None => {

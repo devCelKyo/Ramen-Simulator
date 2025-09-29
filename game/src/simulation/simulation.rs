@@ -72,6 +72,11 @@ impl SimulationEngine {
         let mut order_being_processed: Option<Order> = None;
 
         for _ in 0..steps {
+            // target
+            // let option_order = demand_calculator.tick(duration)
+            // if there is one --> transfer it to OrderProcessor
+            // order_processor.tick(duration) --> returns the order if done
+
             // Customer generation
             if time_before_next_customer == Duration::ZERO {
                 time_before_next_customer = time_between_customers;

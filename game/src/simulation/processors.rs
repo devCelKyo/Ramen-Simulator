@@ -13,11 +13,36 @@ impl RestaurantEngine {
         Self {
             restaurant: r,
             update_state: timestamp,
-            demand_calculator: DemandCalculator{},
+            demand_calculator: DemandCalculator{time_before_next_customer: Duration::ZERO},
             order_processor: OrderProcessor{},
         }
     }
 }
 
-pub struct DemandCalculator {}
+pub struct DemandCalculator {
+    time_before_next_customer: Duration,
+}
+
+impl DemandCalculator {
+    // "tick" API must be respected, implementation should be transparent to caller (simulation)
+    pub fn tick(&mut self, restaurant: &Restaurant, duration: Duration) -> Option<Order> {
+        let time_between_customers = Duration::from_secs(60);
+        
+        self.time_before_next_customer = self.time_before_next_customer.saturating_sub(duration);
+        if self.time_before_next_customer == Duration::ZERO {
+            self.time_before_next_customer = time_between_customers;
+
+            let picked: Option<(&Ramen, f64)> = restaurant.menu.get_one();
+            match picked {
+                Some(ramen_and_price) => {
+                    let order = Order{ramen: (ramen_and_price.0).clone(), price:ramen_and_price.1};
+                    return Some(order);
+                },
+                None => return None
+            }
+        }
+        None
+    }
+}
+
 pub struct OrderProcessor {}

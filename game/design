@@ -1,12 +1,10 @@
-WIP: big simulation loop
 Simulation Is One Big Loop:
 
- 
+We simulate restaurants between T_n and T_(n+1) by splitting Duration = T_(n+1) - T_n into N increments (hard defined in simulation)
+called ticks
 
-
-
-Simulation:
--- During a tick, there should be two main entities:
+Simulation contains a loop, called main simulation loop, in which all N ticks are played.
+-- Inside of the processing of a tick, there should be two main entities:
   - Some sort of "CustomerDemandCalculator" that produces customers based on offer and demand
   - An "OrderProcessor" that only processes order queue based on restaurant and employees
 

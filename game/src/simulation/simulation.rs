@@ -64,20 +64,20 @@ impl SimulationEngine {
         for _ in 0..steps {
             // Customer generation
             let option_order = restaurant_engine.demand_calculator.tick(&restaurant_engine.restaurant, self.increment);
-            if option_order.is_some() {
-                restaurant_engine.order_processor.receive_order(&mut restaurant_engine.restaurant, option_order.unwrap());
+            if let Some(order) = option_order {
+                restaurant_engine.order_processor.receive_order(&mut restaurant_engine.restaurant, order);
             }
 
             // Order processing
             let finished = restaurant_engine.order_processor.tick(&mut restaurant_engine.restaurant, self.increment);
 
             // If order is done
-            if finished.is_some() {
-                if let Some(order) = finished {
-                    restaurant_engine.restaurant.cash += order.price;
-                    output.earnings += order.price;
-                    output.ramen_served += 1;
-                }
+            // Todo should be part of order processor
+            // Should be no intelligence in Main Loop, only orchestration
+            if let Some(order) = finished {
+                restaurant_engine.restaurant.cash += order.price;
+                output.earnings += order.price;
+                output.ramen_served += 1;
             }
         }
         Ok(output)

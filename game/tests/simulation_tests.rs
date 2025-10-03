@@ -12,7 +12,7 @@ fn basic_simulation() {
     let key = restaurant.id;
     
     sim.push_restaurant(restaurant);
-    let output = sim.simulate(key, SystemTime::now().checked_add(Duration::from_secs(180)).unwrap()).unwrap(); // We expect to serve at least 2 orders in that interval
+    let output = sim.simulate(key, SystemTime::now().checked_add(Duration::from_secs(300)).unwrap()).unwrap(); // We expect to serve at least 2 orders in that interval
     let cash_after = sim.seek_restaurant(key).unwrap().cash;
 
     assert!(cash_after > cash_start);

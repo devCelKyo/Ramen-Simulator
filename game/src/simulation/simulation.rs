@@ -1,6 +1,5 @@
 use crate::restaurants::*;
 
-use std::alloc::System;
 use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
@@ -17,6 +16,7 @@ pub struct SimulationOutput {
     pub ramen_served: i32,
 }
 
+#[derive(Debug)]
 pub enum SimulationError {
     RestaurantNotFound,
     InvalidDuration,
@@ -60,45 +60,26 @@ impl SimulationEngine {
         
         let mut output = SimulationOutput{restaurant: key, earnings: 0., ramen_served: 0};
         let steps = duration.as_secs() / self.increment.as_secs();
-        
-        // hard coded shit
-        // Eventually, customer entering the restaurant should be on a certain probability at each increment
-        // This should be based on demand and capacity (to be calculated later, depending on restaurant)
-        let time_between_customers = Duration::from_secs(60);
-        let order_processing_time = Duration::from_secs(30);
-
-        let mut time_before_next_customer = Duration::ZERO;
-        let mut time_before_order_is_done = Duration::ZERO;
-        let mut order_being_processed: Option<Order> = None;
 
         for _ in 0..steps {
-            // target
-            // let option_order = demand_calculator.tick(duration)
-            // if there is one --> transfer it to OrderProcessor
-            // order_processor.tick(duration) --> returns the order if done
-
             // Customer generation
-
-            // Order processing
-            // TODO MOVE ME IN ORDERPROCESSOR
-            match order_being_processed {
-                Some(_) => time_before_order_is_done = time_before_order_is_done.saturating_sub(self.increment),
-                None => {
-                    order_being_processed = rest.placed_orders.pop_first();
-                    time_before_order_is_done = order_processing_time;
-                },
+            let option_order = restaurant_engine.demand_calculator.tick(&restaurant_engine.restaurant, self.increment);
+            if option_order.is_some() {
+                restaurant_engine.order_processor.receive_order(&mut restaurant_engine.restaurant, option_order.unwrap());
             }
 
+            // Order processing
+            let finished = restaurant_engine.order_processor.tick(&mut restaurant_engine.restaurant, self.increment);
+
             // If order is done
-            if time_before_order_is_done == Duration::ZERO {
-                if let Some(order) = order_being_processed.as_ref() {
-                    rest.cash += order.price;
+            if finished.is_some() {
+                if let Some(order) = finished {
+                    restaurant_engine.restaurant.cash += order.price;
                     output.earnings += order.price;
                     output.ramen_served += 1;
                 }
             }
-            time_before_next_customer = time_before_next_customer.saturating_sub(self.increment);
         }
-        Some(output)
+        Ok(output)
     }
 }

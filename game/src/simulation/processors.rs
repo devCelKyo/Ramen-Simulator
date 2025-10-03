@@ -14,7 +14,7 @@ impl RestaurantEngine {
             restaurant: r,
             update_state: timestamp,
             demand_calculator: DemandCalculator{time_before_next_customer: Duration::ZERO},
-            order_processor: OrderProcessor{},
+            order_processor: OrderProcessor{current_order: None, time_before_done: Duration::from_secs(30)},
         }
     }
 }
@@ -45,4 +45,34 @@ impl DemandCalculator {
     }
 }
 
-pub struct OrderProcessor {}
+pub struct OrderProcessor {
+    current_order: Option<Order>,
+    time_before_done: Duration,
+}
+
+impl OrderProcessor {
+    pub fn receive_order(&mut self, restaurant: &mut Restaurant, order: Order) {
+        restaurant.placed_orders.place_order(order);
+    }
+
+    pub fn tick(&mut self, restaurant: &mut Restaurant, duration: Duration) -> Option<Order> {
+        let time_to_cook = Duration::from_secs(30);
+
+        if self.current_order.is_some() {
+            self.time_before_done = self.time_before_done.saturating_sub(duration);
+        }
+        else {
+            self.current_order = restaurant.placed_orders.pop_first();
+        }
+
+        let returned = if self.time_before_done == Duration::ZERO {
+            self.time_before_done = time_to_cook;
+            self.current_order.take()
+        }
+        else {
+            None
+        };
+
+        returned
+    }
+}

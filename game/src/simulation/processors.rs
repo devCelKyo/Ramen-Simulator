@@ -1,6 +1,8 @@
 use crate::restaurants::*;
 use std::time::{Duration, SystemTime};
 
+use super::SimulationOutput;
+
 pub struct RestaurantEngine {
     pub restaurant: Restaurant,
     pub update_state: SystemTime,
@@ -55,7 +57,7 @@ impl OrderProcessor {
         restaurant.placed_orders.place_order(order);
     }
 
-    pub fn tick(&mut self, restaurant: &mut Restaurant, duration: Duration) -> Option<Order> {
+    pub fn tick(&mut self, restaurant: &mut Restaurant, output: &mut SimulationOutput, duration: Duration) {
         let time_to_cook = Duration::from_secs(30);
 
         if self.current_order.is_some() {
@@ -65,7 +67,7 @@ impl OrderProcessor {
             self.current_order = restaurant.placed_orders.pop_first();
         }
 
-        let returned = if self.time_before_done == Duration::ZERO {
+        let finished = if self.time_before_done == Duration::ZERO {
             self.time_before_done = time_to_cook;
             self.current_order.take()
         }
@@ -73,6 +75,10 @@ impl OrderProcessor {
             None
         };
 
-        returned
+        if let Some(finished) = finished {
+            restaurant.cash += finished.price;
+            output.earnings += finished.price;
+            output.ramen_served += 1;
+        }
     }
 }

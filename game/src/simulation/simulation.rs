@@ -69,16 +69,7 @@ impl SimulationEngine {
             }
 
             // Order processing
-            let finished = restaurant_engine.order_processor.tick(&mut restaurant_engine.restaurant, self.increment);
-
-            // If order is done
-            // Todo should be part of order processor
-            // Should be no intelligence in Main Loop, only orchestration
-            if let Some(order) = finished {
-                restaurant_engine.restaurant.cash += order.price;
-                output.earnings += order.price;
-                output.ramen_served += 1;
-            }
+            restaurant_engine.order_processor.tick(&mut restaurant_engine.restaurant, &mut output, self.increment);
         }
         Ok(output)
     }

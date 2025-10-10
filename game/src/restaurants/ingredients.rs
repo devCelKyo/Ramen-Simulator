@@ -44,15 +44,15 @@ impl Inventory {
         self
     }
 
-    pub fn withdraw_receipe(&mut self, receipe: &Receipe) -> Result<&Self, InventoryError> {
+    pub fn withdraw_receipe(&mut self, receipe: &Receipe) -> &Self {
         if !self.can_cook(receipe) {
-            return Err(InventoryError::NotEnoughIngredient);
+            return self;
         }
 
         for ing in receipe.iter() {
             *self.stocks.entry(ing.clone()).or_insert(0) -= 1;
         }
-        Ok(self)
+        self
     }
 
     pub fn is_empty(&self) -> bool {

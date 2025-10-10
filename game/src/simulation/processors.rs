@@ -60,25 +60,36 @@ impl OrderProcessor {
     pub fn tick(&mut self, restaurant: &mut Restaurant, output: &mut SimulationOutput, duration: Duration) {
         let time_to_cook = Duration::from_secs(30);
 
-        if self.current_order.is_some() {
+        if let Some(order) = self.current_order.as_ref() {
             self.time_before_done = self.time_before_done.saturating_sub(duration);
+            
+            if self.time_before_done.is_zero() {
+                self.time_before_done = time_to_cook;
+                
+                restaurant.cash += order.price;
+                output.earnings += order.price;
+                output.ramen_served += 1;
+
+                self.current_order.take();
+            }
         }
         else {
-            self.current_order = restaurant.placed_orders.pop_first();
-        }
-
-        let finished = if self.time_before_done == Duration::ZERO {
-            self.time_before_done = time_to_cook;
-            self.current_order.take()
-        }
-        else {
-            None
-        };
-
-        if let Some(finished) = finished {
-            restaurant.cash += finished.price;
-            output.earnings += finished.price;
-            output.ramen_served += 1;
+            self.current_order = restaurant.placed_orders.peek().map(|order| {
+                if restaurant.stocks.can_cook(order.receipe()) {
+                    restaurant.stocks.withdraw_receipe(order.receipe());
+                    true
+                }
+                else {
+                    false
+                }
+            }).and_then(|cooked| {
+                if cooked {
+                    restaurant.placed_orders.pop_first()
+                }
+                else {
+                    None
+                }
+            });
         }
     }
 }

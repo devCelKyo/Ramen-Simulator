@@ -71,6 +71,9 @@ impl SimulationEngine {
             // Order processing
             restaurant_engine.order_processor.tick(&mut restaurant_engine.restaurant, &mut output, self.increment);
         }
+
+        let simulated_duration = Duration::from_secs(steps * self.increment.as_secs());
+        restaurant_engine.update_state = *last_updated + simulated_duration;
         Ok(output)
     }
 }

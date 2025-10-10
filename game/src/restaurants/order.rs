@@ -1,9 +1,16 @@
 use std::collections::VecDeque;
 use super::Ramen;
+use super::Receipe;
 
 pub struct Order {
     pub ramen: Ramen,
     pub price: f64
+}
+
+impl Order {
+    pub fn receipe(&self) -> &Receipe {
+        &self.ramen.receipe
+    }
 }
 
 pub struct OrderQueue {
@@ -27,6 +34,10 @@ impl OrderQueue {
 
     pub fn pop_first(&mut self) -> Option<Order> {
         self.orders.pop_front()
+    }
+
+    pub fn peek(&self) -> Option<&Order> {
+        self.orders.front()
     }
 
     pub fn place_order(&mut self, order: Order) {

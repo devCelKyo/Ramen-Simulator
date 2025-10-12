@@ -48,7 +48,7 @@ impl DemandCalculator {
 }
 
 pub struct OrderProcessor {
-    current_order: Option<Order>,
+    pub current_order: Option<Order>,
     time_before_done: Duration,
 }
 

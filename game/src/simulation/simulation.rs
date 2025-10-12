@@ -42,6 +42,10 @@ impl SimulationEngine {
         }
     }
 
+    pub fn seek_restaurant_engine(&self, key: RestaurantKey) -> Option<&RestaurantEngine> {
+        self.restaurants.get(&key)
+    }
+
     pub fn simulate(&mut self, key: RestaurantKey, time: SystemTime) -> Result<SimulationOutput, SimulationError> {
         let restaurant_engine = match self.restaurants.get_mut(&key) {
             Some(r) => r,

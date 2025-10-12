@@ -1,22 +1,22 @@
 use game::restaurants::*;
 
-fn miso() -> Ingredient {
+pub fn miso() -> Ingredient {
     Ingredient::new("Miso", IngredientType::Broth)
 }
 
-fn chinese_noodles() -> Ingredient {
+pub fn chinese_noodles() -> Ingredient {
     Ingredient::new("Chinese noodles", IngredientType::Noodles)
 }
 
-fn ground_beef() -> Ingredient {
+pub fn ground_beef() -> Ingredient {
     Ingredient::new("Ground beef", IngredientType::Protein)
 }
 
-fn seaweed() -> Ingredient {
+pub fn seaweed() -> Ingredient {
     Ingredient::new("Seaweed", IngredientType::Vegetable)
 }
 
-fn basic_receipe() -> Result<Receipe, RecipeError> {
+pub fn basic_receipe() -> Result<Receipe, RecipeError> {
     Ok(Receipe::new()
     .with_broth(miso())?
     .with_noodles(chinese_noodles())?
@@ -29,7 +29,7 @@ pub fn basic_ramen() -> Ramen {
     Ramen::new("miso", basic_receipe().unwrap())
 }
 
-fn basic_inventory() -> Inventory {
+pub fn basic_inventory() -> Inventory {
     Inventory::new()
     .add(&miso(), 10)
     .add(&chinese_noodles(), 10)
@@ -37,7 +37,7 @@ fn basic_inventory() -> Inventory {
     .add(&seaweed(), 10)
 }
 
-fn basic_menu() -> Menu {
+pub fn basic_menu() -> Menu {
     let mut menu = Menu::default();
     menu.push_ramen(basic_ramen(), 10.);
     menu

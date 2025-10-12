@@ -44,6 +44,10 @@ impl Inventory {
         self
     }
 
+    pub fn get(&self, ing: &Ingredient) -> i32 {
+        self.stocks.get(ing).map(|qte| *qte).unwrap_or(0)
+    }
+
     pub fn withdraw_receipe(&mut self, receipe: &Receipe) -> &Self {
         if !self.can_cook(receipe) {
             return self;

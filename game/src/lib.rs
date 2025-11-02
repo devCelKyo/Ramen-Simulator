@@ -6,8 +6,10 @@ pub mod restaurants;
 pub mod simulation;
 
 pub mod controller;
+pub mod persistence;
 
 pub fn run() {
     println!("Welcome to Ramen Simulator!");
-    let _conn = Connection::open("rs.db");
+    let conn = Connection::open("rs.db");
+    persistence::db::init(&conn.unwrap());
 }

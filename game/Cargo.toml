@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 rusqlite = { version = "0.37", features = ["bundled"] }
-sea-query = "=0.32.7"
+sea-query = "0.32.7"

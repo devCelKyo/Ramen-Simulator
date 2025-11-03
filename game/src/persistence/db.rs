@@ -2,6 +2,29 @@ use rusqlite::Connection;
 use sea_query::{*};
 
 #[derive(Iden)]
+pub enum Ingredient
+{
+    Table,
+    Id,
+    Name,
+    SavedPrice,
+}
+
+pub fn create_ingredient_table(connection : &Connection)
+{
+    let query = Table::create()
+        .table(Ingredient::Table)
+        .if_not_exists()
+        .col(ColumnDef::new(Ingredient::Id).integer().not_null().auto_increment().primary_key())
+        .col(ColumnDef::new(Ingredient::Name).string().not_null())
+        .col(ColumnDef::new(Ingredient::SavedPrice).double().not_null())
+        .to_owned();
+
+    let _ = connection.execute(&query.to_string(SqliteQueryBuilder), ());
+}
+
+
+#[derive(Iden)]
 pub enum InventoryHead
 {
     Table,
@@ -41,6 +64,43 @@ pub fn create_inventory_tables(connection : &Connection)
 }
 
 #[derive(Iden)]
+pub enum RamenHead
+{
+    Table,
+    Id,
+    Name,
+}
+
+#[derive(Iden)]
+pub enum RamenEntry
+{
+    Table,
+    RamenId,
+    IngredientId,
+}
+
+pub fn create_ramen_tables(connection : &Connection)
+{
+    let query_head = Table::create()
+        .table(RamenHead::Table)
+        .if_not_exists()
+        .col(ColumnDef::new(RamenHead::Id).integer().not_null().auto_increment().primary_key())
+        .col(ColumnDef::new(RamenHead::Name).string().not_null())
+        .to_owned();
+    
+    let _ = connection.execute(&query_head.to_string(SqliteQueryBuilder), ());
+    
+    let query_entry = Table::create()
+        .table(RamenEntry::Table)
+        .if_not_exists()
+        .col(ColumnDef::new(RamenEntry::RamenId).integer().not_null())
+        .col(ColumnDef::new(RamenEntry::IngredientId).integer().not_null())
+        .to_owned();
+
+    let _ = connection.execute(&query_entry.to_string(SqliteQueryBuilder), ());
+}
+
+#[derive(Iden)]
 pub enum MenuHead
 {
     Table,
@@ -73,7 +133,7 @@ pub fn create_menu_tables(connection : &Connection)
         .if_not_exists()
         .col(ColumnDef::new(MenuEntry::MenuId).integer().not_null())
         .col(ColumnDef::new(MenuEntry::RamenId).integer().not_null())
-        .col(ColumnDef::new(MenuEntry::Price).integer().not_null())
+        .col(ColumnDef::new(MenuEntry::Price).double().not_null())
         .to_owned();
 
     let _ = connection.execute(&query_entry.to_string(SqliteQueryBuilder), ());
@@ -112,4 +172,6 @@ pub fn init(connection : &Connection)
     create_restaurant_table(connection);
     create_inventory_tables(connection);
     create_menu_tables(connection);
+    create_ramen_tables(connection);
+    create_ingredient_table(connection);
 }

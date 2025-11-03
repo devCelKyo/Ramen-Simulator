@@ -11,5 +11,5 @@ pub mod persistence;
 pub fn run() {
     println!("Welcome to Ramen Simulator!");
     let conn = Connection::open("rs.db");
-    persistence::db::init(&conn.unwrap());
+    persistence::init(&conn.unwrap());
 }

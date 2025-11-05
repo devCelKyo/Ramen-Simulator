@@ -175,3 +175,5 @@ pub fn init(connection : &Connection)
     create_ramen_tables(connection);
     create_ingredient_table(connection);
 }
+
+use crate::restaurants;

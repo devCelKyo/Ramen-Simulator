@@ -140,7 +140,7 @@ pub fn create_menu_tables(connection : &Connection)
 }
 
 #[derive(Iden)]
-pub enum Restaurant 
+pub enum RestaurantColumn 
 {
     Table,
     Id,
@@ -154,14 +154,14 @@ pub enum Restaurant
 pub fn create_restaurant_table(connection : &Connection)
 {
     let query = Table::create()
-        .table(Restaurant::Table)
+        .table(RestaurantColumn::Table)
         .if_not_exists()
-        .col(ColumnDef::new(Restaurant::Id).integer().not_null().auto_increment().primary_key())
-        .col(ColumnDef::new(Restaurant::OwnerId).integer().not_null())
-        .col(ColumnDef::new(Restaurant::Name).string().not_null())
-        .col(ColumnDef::new(Restaurant::Cash).double().not_null())
-        .col(ColumnDef::new(Restaurant::InventoryId).integer().not_null())
-        .col(ColumnDef::new(Restaurant::MenuId).integer().not_null())
+        .col(ColumnDef::new(RestaurantColumn::Id).integer().not_null().auto_increment().primary_key())
+        .col(ColumnDef::new(RestaurantColumn::OwnerId).integer().not_null())
+        .col(ColumnDef::new(RestaurantColumn::Name).string().not_null())
+        .col(ColumnDef::new(RestaurantColumn::Cash).double().not_null())
+        .col(ColumnDef::new(RestaurantColumn::InventoryId).integer().not_null())
+        .col(ColumnDef::new(RestaurantColumn::MenuId).integer().not_null())
         .to_owned();
 
     let _ = connection.execute(&query.to_string(SqliteQueryBuilder), ());
@@ -176,4 +176,40 @@ pub fn init(connection : &Connection)
     create_ingredient_table(connection);
 }
 
-use crate::restaurants;
+use crate::restaurants::{self, *};
+
+pub fn insert_restaurant(connection: &Connection, restaurant: &Restaurant) 
+{
+    let query = Query::insert()
+        .into_table(RestaurantColumn::Table)
+        .columns([RestaurantColumn::Name, RestaurantColumn::Cash])
+        .values_panic([restaurant.name.clone().into(), restaurant.cash.into()])
+        .to_owned();
+
+    let _ = connection.execute(&query.to_string(SqliteQueryBuilder), ());
+}
+
+pub fn save_restaurant(connection: &Connection, restaurant: &Restaurant) 
+{
+    let query = Query::update()
+        .table(RestaurantColumn::Table)
+        .values([(RestaurantColumn::Name, restaurant.name.clone().into()),
+                 (RestaurantColumn::Cash, restaurant.cash.into())])
+        .and_where(Expr::col(RestaurantColumn::Id).eq(restaurant.id))
+        .to_owned();
+
+    let _ = connection.execute(&query.to_string(SqliteQueryBuilder), ());
+}
+
+pub fn load_restaurant(connection: &Connection, key: RestaurantKey) -> Option<Restaurant>
+{
+    let query = Query::select()
+        .column(RestaurantColumn::Name)
+        .column(RestaurantColumn::Cash)
+        .from(RestaurantColumn::Table)
+        .and_where(Expr::col(RestaurantColumn::Id).eq(key))
+        .to_owned();
+
+    //let result = connection.query_one(&query.to_string(SqliteQueryBuilder), (), 
+    None // todo make me work
+}

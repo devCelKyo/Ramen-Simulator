@@ -1,5 +1,7 @@
-use rusqlite::Connection;
+use rusqlite::{Connection};
 use sea_query::{*};
+
+use crate::restaurants::{Inventory, Menu, Restaurant, RestaurantKey};
 
 #[derive(Iden)]
 pub enum Ingredient
@@ -176,8 +178,6 @@ pub fn init(connection : &Connection)
     create_ingredient_table(connection);
 }
 
-use crate::restaurants::{self, *};
-
 pub fn insert_restaurant(connection: &Connection, restaurant: &Restaurant) 
 {
     let query = Query::insert()
@@ -210,6 +210,19 @@ pub fn load_restaurant(connection: &Connection, key: RestaurantKey) -> Option<Re
         .and_where(Expr::col(RestaurantColumn::Id).eq(key))
         .to_owned();
 
-    //let result = connection.query_one(&query.to_string(SqliteQueryBuilder), (), 
-    None // todo make me work
+    let query_result = connection.query_one(&query.to_string(SqliteQueryBuilder), (), |row|
+    {
+        let name: rusqlite::Result<String>  = row.get(0);
+        let name = match name {
+            Ok(n) => n,
+            Err(e) => return Err(e)
+        };
+        let cash = match row.get(1) {
+            Ok(c) => c,
+            Err(e) => return Err(e)
+        };
+        Ok(Restaurant::new(&name.as_str(), cash, Menu::default(), Inventory::new()))
+    });
+    
+    query_result.ok()
 }

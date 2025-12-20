@@ -44,5 +44,5 @@ pub fn basic_menu() -> Menu {
 }
 
 pub fn basic_restaurant() -> Restaurant {
-    Restaurant::new("Test Restaurant", 1000., basic_menu(), basic_inventory())
+    Restaurant::new(0, "Test Restaurant", 1000., basic_menu(), basic_inventory())
 }

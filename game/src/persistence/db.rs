@@ -178,17 +178,22 @@ pub fn init(connection : &Connection)
     create_ingredient_table(connection);
 }
 
-pub fn insert_restaurant(connection: &Connection, restaurant: &Restaurant) 
+pub fn insert_restaurant(connection: &Connection, restaurant: &Restaurant) -> Option<i64> 
 {
     let query = Query::insert()
         .into_table(RestaurantColumn::Table)
-        .columns([RestaurantColumn::Name, RestaurantColumn::Cash])
-        .values_panic([restaurant.name.clone().into(), restaurant.cash.into()])
+        .columns([RestaurantColumn::OwnerId, RestaurantColumn::Name, RestaurantColumn::Cash, RestaurantColumn::InventoryId, RestaurantColumn::MenuId])
+        .values_panic([0.into(), restaurant.name.clone().into(), restaurant.cash.into(), 0.into(), 0.into()])
         .to_owned();
 
-    let _ = connection.execute(&query.to_string(SqliteQueryBuilder), ());
+    let query_result = connection.execute(&query.to_string(SqliteQueryBuilder), ());
+    match query_result {
+        Ok(_) => Some(connection.last_insert_rowid()),
+        Err(_) => None
+    }
 }
 
+// Needs error handling if save fails.
 pub fn save_restaurant(connection: &Connection, restaurant: &Restaurant) 
 {
     let query = Query::update()
@@ -221,7 +226,7 @@ pub fn load_restaurant(connection: &Connection, key: RestaurantKey) -> Option<Re
             Ok(c) => c,
             Err(e) => return Err(e)
         };
-        Ok(Restaurant::new(&name.as_str(), cash, Menu::default(), Inventory::new()))
+        Ok(Restaurant::new(key, &name.as_str(), cash, Menu::default(), Inventory::new()))
     });
     
     query_result.ok()

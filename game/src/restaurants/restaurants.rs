@@ -3,7 +3,7 @@ use super::Inventory;
 
 use super::OrderQueue;
 
-pub type RestaurantKey = i32;
+pub type RestaurantKey = i64;
 pub struct Restaurant {
     pub id: RestaurantKey,
     pub name: String,
@@ -25,9 +25,9 @@ impl Restaurant {
         }
     }
 
-    pub fn new(name: &str, cash: f64, menu: Menu, stocks: Inventory) -> Restaurant {
+    pub fn new(id: RestaurantKey, name: &str, cash: f64, menu: Menu, stocks: Inventory) -> Restaurant {
         Self {
-            id: 0,
+            id: id,
             name: String::from(name),
             cash: cash,
             menu: menu,

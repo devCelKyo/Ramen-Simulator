@@ -1,5 +1,6 @@
 use game::restaurants::Restaurant;
 
+#[allow(dead_code)]
 mod catalog;
 
 #[test]

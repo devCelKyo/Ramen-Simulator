@@ -1,0 +1,16 @@
+.git
+node_modules
+dist
+.env
+.env.*
+secrets
+**/secrets
+**/*.pem
+**/*.key
+**/*.sql
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite-*
+coverage
+*.log

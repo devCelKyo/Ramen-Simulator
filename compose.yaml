@@ -1,0 +1,18 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    init: true
+    environment:
+      DISCORD_TOKEN_FILE: /run/secrets/discord_token
+    secrets:
+      - discord_token
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+secrets:
+  discord_token:
+    file: ${DISCORD_TOKEN_PATH:?Set DISCORD_TOKEN_PATH to the existing private token file outside this checkout}
